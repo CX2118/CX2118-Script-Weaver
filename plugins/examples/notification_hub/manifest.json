@@ -1,0 +1,35 @@
+{
+  "name": "notification_hub",
+  "version": "1.0.0",
+  "display_name": "通知中心",
+  "description": "在 Pipeline 关键阶段推送通知（控制台高亮、文件日志、Webhook 回调）",
+  "author": "cx2118",
+  "plugin_type": "notifier",
+  "entry_point": "main.py",
+  "hook_points": [
+    "on_phase_change", "on_error", "on_budget_warning",
+    "after_requirements_save", "after_director_plan",
+    "after_coding", "after_ai_review", "after_human_review",
+    "on_startup", "on_shutdown"
+  ],
+  "hook_priority": 90,
+  "dependencies": [],
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "console_notify": {"type": "boolean", "default": true, "title": "控制台通知"},
+      "log_to_file": {"type": "boolean", "default": false, "title": "记录到文件"},
+      "webhook_url": {"type": "string", "default": "", "title": "Webhook URL"},
+      "notify_on_error": {"type": "boolean", "default": true, "title": "错误通知"},
+      "notify_on_complete": {"type": "boolean", "default": true, "title": "完成通知"},
+      "log_file_path": {"type": "string", "default": "workspace/notifications.log", "title": "日志路径"}
+    }
+  },
+  "default_config": {
+    "console_notify": true, "log_to_file": false, "webhook_url": "",
+    "notify_on_error": true, "notify_on_complete": true, "log_file_path": "workspace/notifications.log"
+  },
+  "permissions": ["log_read", "log_write", "network"],
+  "tags": ["notification", "logging", "webhook"],
+  "icon": "🔔"
+}

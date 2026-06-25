@@ -1,0 +1,10 @@
+{
+  "name": "log_aggregator",
+  "version": "1.0.0",
+  "description": "日志聚合器 — 收集并持久化所有阶段日志到文件",
+  "plugin_type": "notifier",
+  "entry_point": "main.py",
+  "hook_points": ["after_coding", "after_pm_chat", "after_director_plan"],
+  "author": "CX2118",
+  "enabled": true
+}

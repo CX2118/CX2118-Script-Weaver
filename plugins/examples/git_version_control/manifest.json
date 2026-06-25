@@ -1,0 +1,10 @@
+{
+  "name": "git_version_control",
+  "version": "1.0.0",
+  "description": "Git 版本控制 — 自动提交代码快照到本地 Git 仓库",
+  "plugin_type": "notifier",
+  "entry_point": "main.py",
+  "hook_points": ["after_coding", "after_requirements_save"],
+  "author": "CX2118",
+  "enabled": true
+}

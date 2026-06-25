@@ -1,0 +1,62 @@
+{
+  "name": "auto_formatter",
+  "version": "1.0.0",
+  "display_name": "自动代码格式化",
+  "description": "在代码保存前自动格式化 Python/HTML 代码，支持去除尾随空格、整理缩进、确保末尾换行",
+  "author": "cx2118",
+  "plugin_type": "transformer",
+  "entry_point": "main.py",
+  "hook_points": [
+    "before_code_save",
+    "after_python_code",
+    "after_html_code"
+  ],
+  "hook_priority": 30,
+  "dependencies": [],
+  "validator_targets": ["python", "html"],
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "python_format": {
+        "type": "boolean",
+        "default": true,
+        "title": "格式化 Python",
+        "description": "是否自动格式化 Python 代码"
+      },
+      "html_format": {
+        "type": "boolean",
+        "default": true,
+        "title": "格式化 HTML",
+        "description": "是否自动格式化 HTML 代码"
+      },
+      "trim_trailing_whitespace": {
+        "type": "boolean",
+        "default": true,
+        "title": "去除行尾空白",
+        "description": "删除每行末尾的多余空格"
+      },
+      "ensure_final_newline": {
+        "type": "boolean",
+        "default": true,
+        "title": "确保末尾换行",
+        "description": "确保文件末尾有一个空行"
+      },
+      "max_line_length": {
+        "type": "integer",
+        "default": 120,
+        "title": "最大行宽",
+        "description": "建议的最大行长度"
+      }
+    }
+  },
+  "default_config": {
+    "python_format": true,
+    "html_format": true,
+    "trim_trailing_whitespace": true,
+    "ensure_final_newline": true,
+    "max_line_length": 120
+  },
+  "permissions": ["code_read", "code_modify"],
+  "tags": ["formatter", "code-quality", "python", "html"],
+  "icon": "✨"
+}

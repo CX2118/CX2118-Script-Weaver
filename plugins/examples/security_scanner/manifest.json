@@ -1,0 +1,51 @@
+{
+  "name": "security_scanner",
+  "version": "1.0.0",
+  "display_name": "安全代码扫描器",
+  "description": "扫描生成的代码中的安全隐患，包括硬编码密钥、SQL注入风险、XSS漏洞等",
+  "author": "cx2118",
+  "plugin_type": "validator",
+  "entry_point": "main.py",
+  "hook_points": [
+    "after_python_code",
+    "after_html_code",
+    "before_code_save"
+  ],
+  "hook_priority": 10,
+  "dependencies": [],
+  "validator_targets": ["python", "html"],
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "check_hardcoded_secrets": {
+        "type": "boolean",
+        "default": true,
+        "title": "检查硬编码密钥"
+      },
+      "check_sql_injection": {
+        "type": "boolean",
+        "default": true,
+        "title": "检查SQL注入"
+      },
+      "check_xss": {
+        "type": "boolean",
+        "default": true,
+        "title": "检查XSS漏洞"
+      },
+      "block_on_critical": {
+        "type": "boolean",
+        "default": false,
+        "title": "严重问题阻止保存"
+      }
+    }
+  },
+  "default_config": {
+    "check_hardcoded_secrets": true,
+    "check_sql_injection": true,
+    "check_xss": true,
+    "block_on_critical": false
+  },
+  "permissions": ["code_read"],
+  "tags": ["security", "validator", "scanner"],
+  "icon": "🛡️"
+}

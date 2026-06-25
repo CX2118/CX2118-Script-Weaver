@@ -1,0 +1,2454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>cx2118 脚本编织器 v9.3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f8f8fa;--surface:rgba(255,255,255,.65);--surface-solid:rgba(255,255,255,.92);
+  --surface-strong:rgba(255,255,255,.78);--surface-code:rgba(255,255,255,.88);
+  --surface-input:rgba(255,255,255,.6);--surface-hover:rgba(255,255,255,.85);
+  --glass-border:rgba(255,255,255,.55);--glass-border-strong:rgba(255,255,255,.65);
+  --glass-blur:saturate(180%) blur(28px);--glass-blur-strong:saturate(200%) blur(40px);
+  --text:#111;--text-secondary:#6e6e73;--text-tertiary:#aeaeb2;--text-quaternary:#d1d1d6;
+  --divider:rgba(0,0,0,.08);--shadow-sm:0 2px 8px rgba(0,0,0,.04);
+  --shadow-md:0 8px 32px rgba(0,0,0,.06);--shadow-lg:0 16px 48px rgba(0,0,0,.08);
+  --accent:#4090ff;--accent-dim:rgba(64,144,255,.08);--accent-border:rgba(64,144,255,.25);
+  --blue:#4090ff;--green:#34c77b;--green-dim:rgba(52,199,123,.08);--green-border:rgba(52,199,123,.25);
+  --red:#f06060;--red-dim:rgba(240,96,96,.08);--red-border:rgba(240,96,96,.25);
+  --purple:#9070e0;--r-sm:12px;--r-md:20px;--r-lg:28px;--r-pill:100px;
+  --sans:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:'JetBrains Mono','SF Mono',monospace;
+  --ease-expo:cubic-bezier(.16,1,.3,1);
+}
+body.dark{
+  --bg:#0a0a10;--surface:rgba(255,255,255,.06);--surface-solid:rgba(20,20,30,.92);
+  --surface-strong:rgba(255,255,255,.08);--surface-code:rgba(15,15,25,.88);
+  --surface-input:rgba(255,255,255,.06);--surface-hover:rgba(255,255,255,.1);
+  --glass-border:rgba(255,255,255,.1);--glass-border-strong:rgba(255,255,255,.15);
+  --text:#f0f0f0;--text-secondary:#a0a0a8;--text-tertiary:#6e6e73;--text-quaternary:#3a3a40;
+  --divider:rgba(255,255,255,.08);--shadow-sm:0 2px 8px rgba(0,0,0,.2);
+  --shadow-md:0 8px 32px rgba(0,0,0,.3);--shadow-lg:0 16px 48px rgba(0,0,0,.4);
+  --accent:#6ab4ff;--green:#50e8a0;--red:#ff7070;--purple:#b090ff;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);height:100vh;overflow:hidden;line-height:1.7;transition:background .5s var(--ease-expo),color .5s var(--ease-expo)}
+::selection{background:var(--accent-dim);color:var(--accent)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--text-quaternary);border-radius:4px}::-webkit-scrollbar-track{background:transparent}
+body.dark ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12)}
+body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;display:none}
+.bg-orbs{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35}
+.orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(64,144,255,.22),transparent 70%);top:-8%;left:-4%;animation:oF1 22s ease-in-out infinite}
+.orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(52,199,123,.15),transparent 70%);top:35%;right:-8%;animation:oF2 18s ease-in-out infinite}
+.orb-3{width:450px;height:450px;background:radial-gradient(circle,rgba(144,112,224,.12),transparent 70%);bottom:-5%;left:25%;animation:oF3 24s ease-in-out infinite}
+body.dark .orb{opacity:.25}
+@keyframes oF1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,30px) scale(1.05)}66%{transform:translate(-20px,50px) scale(.95)}}
+@keyframes oF2{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-30px,-40px) scale(.95)}66%{transform:translate(20px,30px) scale(1.08)}}
+@keyframes oF3{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.06)}66%{transform:translate(-40px,10px) scale(.94)}}
+.glass{background:var(--surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);box-shadow:var(--shadow-sm)}
+.glass-strong{background:var(--surface-strong);backdrop-filter:var(--glass-blur-strong);-webkit-backdrop-filter:var(--glass-blur-strong);border:1px solid var(--glass-border-strong);box-shadow:var(--shadow-sm)}
+.glass-code{background:var(--surface-code);backdrop-filter:saturate(150%) blur(20px);-webkit-backdrop-filter:saturate(150%) blur(20px);border:1px solid var(--glass-border)}
+.app{display:grid;grid-template-rows:56px 1fr;height:100vh;padding:8px;gap:8px}
+.main{display:grid;grid-template-columns:256px 1fr;gap:8px;min-height:0}
+.topbar{display:flex;align-items:center;gap:12px;padding:0 20px;border-radius:var(--r-lg);z-index:10}
+.brand{font-family:var(--sans);font-weight:700;font-size:1.05rem;color:var(--text);letter-spacing:-.02em}
+.brand span{color:var(--accent)}
+.ver{font-family:var(--mono);font-size:.58rem;color:var(--text-tertiary);border:1px solid var(--text-quaternary);border-radius:var(--r-pill);padding:2px 10px}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.dot.idle{background:var(--green)}.dot.requirements{background:var(--blue);animation:dotP 1.8s ease-in-out infinite}.dot.planning{background:var(--purple);animation:dotP 1.8s ease-in-out infinite}.dot.coding{background:var(--accent);animation:dotP 1.8s ease-in-out infinite}.dot.review{background:var(--green)}
+@keyframes dotP{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.pill{font-family:var(--mono);font-size:.68rem;font-weight:600;padding:4px 14px;border-radius:var(--r-pill);background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);min-width:80px;text-align:center}
+.spacer{flex:1}
+.tb{background:var(--surface-input);border:1px solid var(--glass-border);color:var(--text-secondary);padding:7px 16px;font-family:var(--sans);font-size:.76rem;font-weight:600;cursor:pointer;border-radius:var(--r-pill);transition:all .3s var(--ease-expo);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.tb:hover{border-color:var(--text-quaternary);color:var(--text);background:var(--surface-hover);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.tb:active{transform:translateY(0) scale(.98)}
+.tb.pri{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+.tb.pri:hover{filter:brightness(1.08)}
+body.dark .tb.pri{color:#fff}
+.tb:disabled{opacity:.35;cursor:default;filter:none;transform:none}
+.tb.sm{padding:4px 12px;font-size:.68rem}
+.sb{border-radius:var(--r-lg);overflow-y:auto;padding:20px 0;display:flex;flex-direction:column}
+.sb-sec{padding:0 18px}
+.sb-title{font-size:.62rem;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;padding-bottom:8px}
+.sb-divider{height:1px;margin:14px 18px;background:linear-gradient(90deg,transparent,var(--divider) 15%,var(--divider) 85%,transparent)}
+.sb-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:.8rem}
+.sb-lb{color:var(--text-tertiary);min-width:44px;font-size:.7rem;font-weight:500}
+.sb-vl{font-weight:600;font-size:.78rem;transition:color .3s}
+.sb-vl.ok{color:var(--green)}.sb-vl.no{color:var(--text-tertiary)}
+.meter{flex:1;height:5px;background:var(--text-quaternary);border-radius:3px;overflow:hidden;opacity:.4}
+.meter-f{height:100%;border-radius:3px;transition:width .8s var(--ease-expo);background:var(--green)}
+.meter-f.warn{background:var(--accent)}.meter-f.danger{background:var(--red)}
+.skill-pill{display:inline-block;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);padding:3px 12px;border-radius:var(--r-pill);font-family:var(--mono);font-size:.6rem;margin:3px 4px 3px 0;font-weight:500}
+.content{border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column}
+.views{flex:1;overflow:hidden;position:relative;min-height:0}
+.view{position:absolute;inset:0;overflow-y:auto;padding:20px 24px;opacity:0;pointer-events:none;transition:opacity .3s var(--ease-expo)}
+.view.active{opacity:1;pointer-events:auto}
+.cp{border-radius:var(--r-md);overflow:hidden;margin-bottom:14px}
+.cp-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--divider);font-size:.72rem;gap:12px}
+.cp-tabs{display:flex;gap:2px;flex:1}
+.cp-tab{padding:5px 14px;font-size:.7rem;cursor:pointer;color:var(--text-tertiary);border-radius:var(--r-pill);transition:all .3s var(--ease-expo);font-weight:500;user-select:none}
+.cp-tab:hover{color:var(--text-secondary);background:var(--surface)}
+.cp-tab.active{color:var(--accent);background:var(--accent-dim);font-weight:600}
+.cp-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.cp-count{color:var(--accent);font-weight:700;font-size:.8rem;font-family:var(--mono)}
+.cp-toggle{color:var(--text-tertiary);font-size:.65rem;cursor:pointer;transition:transform .3s var(--ease-expo);padding:4px 6px;border-radius:var(--r-sm)}
+.cp-toggle:hover{color:var(--text-secondary);background:var(--surface)}
+.cp-toggle.collapsed{transform:rotate(-90deg)}
+.cp-body{height:240px;overflow-y:auto;background:var(--surface-code);transition:height .4s var(--ease-expo)}
+.cp-body.collapsed{height:0;overflow:hidden}
+.cp-line{display:flex;padding:0 16px;font-family:var(--mono);font-size:.78rem;line-height:1.85}
+.cp-line:hover{background:var(--accent-dim)}
+.cp-ln{min-width:40px;text-align:right;color:var(--text-tertiary);padding-right:14px;user-select:none;font-size:.66rem;border-right:1px solid var(--divider);margin-right:14px;display:flex;align-items:center;justify-content:flex-end;flex-shrink:0}
+.cp-code{white-space:pre;color:var(--text);overflow-x:auto;flex:1}
+.cp-empty{color:var(--text-tertiary);font-size:.82rem;padding:36px;text-align:center}
+.html-live{border-radius:var(--r-md);overflow:hidden;margin-bottom:14px}
+.html-live-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--divider);font-size:.72rem}
+.html-live-head .label{font-weight:600;color:var(--green);font-size:.78rem}
+.html-live-body{height:200px;background:#fff;border-radius:0 0 var(--r-md) var(--r-md);overflow:hidden}
+.html-live-body iframe{width:100%;height:100%;border:none}
+.stream-panel{border-radius:var(--r-md);overflow:hidden;margin-bottom:14px}
+.stream-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--divider);font-size:.72rem}
+.stream-head .label{font-weight:600;color:var(--blue);display:flex;align-items:center;gap:6px;font-size:.78rem}
+.spinner{width:12px;height:12px;border:2px solid var(--accent-border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;display:none}
+.spinner.active{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.stream-body{font-family:var(--mono);font-size:.76rem;line-height:1.8;padding:12px 16px;max-height:200px;overflow-y:auto;background:var(--surface-code);color:var(--text-secondary);white-space:pre-wrap;word-break:break-all}
+.stream-body .cursor{display:inline-block;width:7px;height:14px;background:var(--accent);animation:blink 1s step-end infinite;vertical-align:text-bottom;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+.stream-body.empty{color:var(--text-tertiary);text-align:center;padding:20px;font-family:var(--sans)}
+.rf-panel{border-radius:var(--r-md);margin-bottom:14px;overflow:hidden;animation:panelReveal .4s var(--ease-expo)}
+.rf-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--divider);font-size:.82rem;font-weight:600}
+.rf-count{color:var(--accent);font-weight:700;font-family:var(--mono)}
+.rf-body{max-height:400px;overflow-y:auto}
+.rf-finding{padding:14px 18px;border-bottom:1px solid var(--divider);transition:background .25s,opacity .3s}
+.rf-finding:last-child{border-bottom:none}.rf-finding:hover{background:var(--surface-hover)}
+.rf-finding.applied{opacity:.4;background:var(--green-dim)}.rf-finding.rejected{opacity:.3}
+.rf-fh{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.rf-sev{font-size:.58rem;padding:3px 10px;border-radius:var(--r-pill);font-weight:600;text-transform:uppercase}
+.rf-sev.error{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.rf-sev.warning{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border)}
+.rf-lines{font-size:.68rem;color:var(--text-tertiary);font-family:var(--mono)}
+.rf-title{font-size:.82rem;font-weight:600;color:var(--text);flex:1}
+.rf-desc{font-size:.78rem;color:var(--text-secondary);line-height:1.65;margin-bottom:8px}
+.rf-fix{background:var(--surface-code);border:1px solid var(--glass-border);border-radius:var(--r-sm);padding:10px 14px;font-family:var(--mono);font-size:.72rem;color:var(--text-secondary);max-height:80px;overflow:auto;margin-bottom:10px;white-space:pre}
+.rf-fa{display:flex;gap:8px;align-items:center}
+.rf-status{font-size:.68rem;padding:4px 12px;border-radius:var(--r-pill);font-weight:500}
+.rf-status.applied{background:var(--green-dim);color:var(--green)}.rf-status.rejected{background:var(--surface);color:var(--text-tertiary)}
+.rf-actions{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--divider);align-items:center}
+.rp{border-radius:var(--r-md);overflow:hidden}
+.rp-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--divider);font-size:.72rem;gap:12px}
+.rp-tabs{display:flex;gap:2px;flex:1}
+.rp-tab{padding:5px 14px;font-size:.7rem;cursor:pointer;color:var(--text-tertiary);border-radius:var(--r-pill);transition:all .3s var(--ease-expo);font-weight:500;user-select:none}
+.rp-tab:hover{color:var(--text-secondary);background:var(--surface)}
+.rp-tab.active{color:var(--accent);background:var(--accent-dim);font-weight:600}
+.rp-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.rp-file{color:var(--text-tertiary);font-size:.65rem;font-family:var(--mono)}
+.rp-count{color:var(--green);font-weight:700;font-size:.88rem;font-family:var(--mono)}
+.rp-body{height:calc(100vh - 340px);overflow-y:auto;background:var(--surface-code);padding:8px 0}
+.msg{margin:12px 0;padding:14px 18px;border-radius:var(--r-md);font-size:.84rem;line-height:1.75;max-width:82%}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{background:var(--accent);color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+.msg.pm{background:var(--surface);border:1px solid var(--glass-border);border-bottom-left-radius:4px}
+.msg .sender{font-size:.6rem;color:var(--text-tertiary);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.msg.user .sender{color:rgba(255,255,255,.6)}
+.msg-c{white-space:pre-wrap;word-break:break-word}
+.think{color:var(--blue);font-size:.8rem;padding:14px 0;animation:thinkPulse 1.8s ease-in-out infinite}
+@keyframes thinkPulse{0%,100%{opacity:1}50%{opacity:.35}}
+.sys{font-size:.78rem;padding:4px 0;display:flex;align-items:center;gap:8px}
+.sys .ts{color:var(--text-tertiary);font-family:var(--mono);font-size:.62rem}
+.sys.success{color:var(--green)}.sys.error{color:var(--red)}.sys.warn{color:var(--accent)}.sys.info{color:var(--blue)}.sys.system{color:var(--purple)}.sys.dim{color:var(--text-tertiary)}
+.plan-card{background:var(--surface);border:1px solid var(--glass-border);border-radius:var(--r-md);padding:24px;margin:14px 0;animation:panelReveal .5s var(--ease-expo)}
+.plan-card h3{font-weight:700;font-size:1.05rem;color:var(--accent);margin-bottom:14px}
+.plan-row{display:flex;gap:8px;margin:7px 0;font-size:.82rem}
+.plan-lb{color:var(--text-tertiary);min-width:80px;font-size:.72rem;font-weight:500}
+.plan-vl{color:var(--text)}
+.fcard{background:var(--surface-hover);border:1px solid var(--glass-border);border-radius:var(--r-sm);padding:12px 16px;margin:7px 0}
+.fcard .nm{color:var(--blue);font-weight:600;font-size:.82rem}.fcard .ds{color:var(--text-tertiary);font-size:.72rem;margin-top:2px}
+.diff-line{display:flex;font-family:var(--mono);font-size:.78rem;line-height:1.85;border-left:3px solid transparent;margin:1px 0;border-radius:0 var(--r-sm) var(--r-sm) 0}
+.diff-mk{width:28px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.diff-r{width:44px;text-align:right;padding-right:10px;color:var(--text-tertiary);flex-shrink:0;font-size:.62rem}
+.diff-c{flex:1;padding:0 12px 0 8px;white-space:pre;overflow-x:auto}
+.da{background:var(--green-dim);border-left-color:var(--green-border)}.da .diff-mk{color:var(--green)}.da .diff-c{color:var(--green)}
+.dd{background:var(--red-dim);border-left-color:var(--red-border)}.dd .diff-mk{color:var(--red)}.dd .diff-c{color:var(--red);text-decoration:line-through;opacity:.6}
+.dm-o{background:var(--accent-dim);border-left-color:var(--accent-border)}.dm-o .diff-mk{color:var(--accent)}.dm-o .diff-c{color:var(--red);text-decoration:line-through;opacity:.5}
+.dm-n{background:var(--green-dim);border-left-color:var(--accent-border)}.dm-n .diff-mk{color:var(--accent)}.dm-n .diff-c{color:var(--green)}
+.diff-hdr{font-weight:700;padding:10px 0;border-top:1px solid var(--divider);border-bottom:1px solid var(--divider);margin:10px 0;font-size:.78rem;color:var(--text-secondary)}
+.coder-sep{border-top:1px dashed var(--text-quaternary);margin:18px 0;position:relative}
+.coder-sep::after{content:attr(data-label);position:absolute;top:-9px;left:14px;background:var(--surface-solid);padding:2px 10px;font-size:.62rem;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.08em;font-weight:600;border-radius:var(--r-pill);border:1px solid var(--glass-border)}
+.act-bar{display:flex;gap:10px;padding:12px 20px;border-top:1px solid var(--divider);flex-wrap:wrap;align-items:center}
+.act-bar.hidden{display:none}
+.check-label{font-size:.74rem;color:var(--text-secondary);display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.check-label input{accent-color:var(--accent);width:15px;height:15px}
+.input-bar{display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--divider)}
+.input-bar .ic{color:var(--accent);font-size:1.1rem;font-weight:800}
+.input-bar input{flex:1;background:var(--surface-input);border:1px solid var(--glass-border);outline:none;color:var(--text);font-family:var(--sans);font-size:.88rem;padding:12px 18px;border-radius:var(--r-pill);transition:border-color .3s var(--ease-expo)}
+.input-bar input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.input-bar input::placeholder{color:var(--text-tertiary)}
+.input-bar .send{background:var(--accent);color:#fff;border:none;padding:12px 24px;font-family:var(--sans);font-size:.8rem;font-weight:700;cursor:pointer;border-radius:var(--r-pill);transition:all .3s var(--ease-expo)}
+.input-bar .send:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.input-bar .send:disabled{opacity:.3;filter:none;cursor:default}
+.pm-input-bar{transition:border-color .3s var(--ease-expo),box-shadow .3s var(--ease-expo)}
+.pm-input-bar:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.pm-input-bar input::placeholder{color:var(--text-tertiary);opacity:.6}
+.pm-input-bar button{transition:all .25s var(--ease-expo)}
+.pm-input-bar button:hover{filter:brightness(1.1);transform:scale(1.02)}
+.pm-input-bar button:active{transform:scale(.97)}
+#pmTerminal{scroll-behavior:smooth}
+.drawer-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;opacity:0;pointer-events:none;transition:opacity .35s var(--ease-expo);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.drawer-bg.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:520px;background:var(--surface-strong);backdrop-filter:var(--glass-blur-strong);-webkit-backdrop-filter:var(--glass-blur-strong);border-left:1px solid var(--glass-border-strong);z-index:101;transform:translateX(100%);transition:transform .45s var(--ease-expo);overflow-y:auto}
+.drawer.open{transform:translateX(0);box-shadow:-8px 0 40px rgba(0,0,0,.12)}
+.dh{padding:24px 28px 0;display:flex;align-items:center;gap:12px}
+.dh h2{font-weight:700;font-size:1.15rem;color:var(--text);flex:1}
+.dh .close{background:var(--surface-input);border:1px solid var(--glass-border);color:var(--text-tertiary);width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-pill);cursor:pointer;font-size:1rem;transition:all .3s var(--ease-expo)}
+.dh .close:hover{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+.db{padding:20px 28px 28px}
+.tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid var(--divider)}
+.tab{padding:10px 18px;font-size:.78rem;cursor:pointer;color:var(--text-tertiary);border-bottom:2px solid transparent;transition:all .3s var(--ease-expo);font-weight:500}
+.tab:hover{color:var(--text)}.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tc{display:none}.tc.active{display:block}
+.fld{margin-bottom:18px}
+.fld label{display:block;font-size:.66rem;color:var(--text-tertiary);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.fld input,.fld select,.fld textarea{width:100%;font-family:var(--mono);font-size:.82rem;padding:10px 14px;background:var(--surface-input);border:1px solid var(--glass-border);color:var(--text);outline:none;border-radius:var(--r-sm);transition:border-color .3s var(--ease-expo)}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.fld textarea{min-height:100px;resize:vertical;line-height:1.6}.fld select{appearance:none;cursor:pointer}
+.pw{position:relative;display:flex;align-items:center}.pw input{padding-right:40px}
+.pw-t{position:absolute;right:10px;background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:.85rem;padding:4px}.pw-t:hover{color:var(--text)}
+.ac{background:var(--surface);border:1px solid var(--glass-border);border-radius:var(--r-md);padding:18px;margin-bottom:14px}
+.ac h4{font-size:.84rem;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.ac h4 .badge{font-family:var(--mono);font-size:.56rem;padding:3px 10px;border-radius:var(--r-pill);font-weight:600}
+.badge.on{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}.badge.off{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.kb{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:.68rem;padding:4px 12px;border-radius:var(--r-pill);font-weight:500}
+.kb.ok{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}.kb.no{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.tog{position:relative;width:38px;height:22px;background:var(--text-quaternary);border-radius:11px;cursor:pointer;transition:background .3s var(--ease-expo);flex-shrink:0}
+.tog.on{background:var(--green)}.tog::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .3s var(--ease-expo);box-shadow:0 1px 4px rgba(0,0,0,.15)}.tog.on::after{transform:translateX(16px)}
+.tbtn2{background:var(--surface-input);border:1px solid var(--glass-border);color:var(--text-secondary);padding:7px 16px;font-family:var(--mono);font-size:.72rem;cursor:pointer;border-radius:var(--r-pill);transition:all .3s var(--ease-expo)}
+.tbtn2:hover{border-color:var(--blue);color:var(--blue)}.tbtn2:disabled{opacity:.4;cursor:default}
+.tr{font-family:var(--mono);font-size:.7rem;padding:10px 14px;border-radius:var(--r-sm);margin-top:10px;white-space:pre-wrap;word-break:break-all;line-height:1.5;display:none}
+.tr.ok{display:block;background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}.tr.err{display:block;background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.df{padding:18px 28px;border-top:1px solid var(--divider);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface-strong);backdrop-filter:var(--glass-blur-strong);-webkit-backdrop-filter:var(--glass-blur-strong);border:1px solid var(--glass-border-strong);border-radius:var(--r-lg);width:560px;max-height:80vh;overflow-y:auto;padding:28px;box-shadow:var(--shadow-lg);animation:panelReveal .4s var(--ease-expo)}
+@keyframes panelReveal{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.mt2{margin-top:12px}.flex{display:flex}.gap8{gap:8px}.items-c{align-items:center}.justify-e{justify-content:flex-end}.flex1{flex:1}
+/* Mode switcher */
+.mode-btn{position:relative}
+.mode-btn.active::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:16px;height:2px;background:var(--accent);border-radius:1px}
+
+/* No-glass mode — performance optimization */
+body.no-glass .glass,body.no-glass .glass-strong,body.no-glass .glass-code,body.no-glass .drawer,body.no-glass .modal,body.no-glass .drawer-bg,body.no-glass .modal-bg{backdrop-filter:none;-webkit-backdrop-filter:none;filter:none}
+body.no-glass .glass{background:var(--surface-solid)}
+body.no-glass .glass-strong{background:var(--surface-solid)}
+body.no-glass .glass-code{background:var(--surface-solid)}
+body.no-glass .drawer{background:var(--surface-solid)}
+body.no-glass .modal{background:var(--surface-solid)}
+body.no-glass .drawer-bg{background:rgba(0,0,0,.5)}
+body.no-glass .modal-bg{background:rgba(0,0,0,.5)}
+body.no-glass .bg-orbs{display:none}
+body.no-glass::after{display:none}
+body.no-glass .orb{animation:none!important;opacity:0}
+body.no-glass *{animation-duration:0s!important;transition-duration:0s!important;will-change:auto}
+body.no-glass .msg{animation:none;opacity:1}
+body.no-glass .plan-card{animation:none}
+body.no-glass .rf-panel{animation:none}
+body.no-glass .dot.requirements,body.no-glass .dot.planning,body.no-glass .dot.coding{animation:none}
+body.no-glass .think{animation:none;opacity:1}
+body.no-glass .spinner.active{animation:spin .8s linear infinite}
+body.no-glass .meter-f{transition:width 0s}
+body.no-glass .tb,body.no-glass button,body.no-glass .cp-tab,body.no-glass .rp-tab,body.no-glass .tog{transition:transform .15s ease,opacity .15s ease;background-color:var(--surface)}
+body.no-glass .tb:hover,body.no-glass button:hover{transform:scale(1.03);opacity:.9}
+body.no-glass .tb:active,body.no-glass button:active{transform:scale(.97);opacity:.8}
+
+/* Workflow toolbar */
+.wf-toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-radius:var(--r-md);margin-bottom:10px;gap:8px;flex-wrap:wrap}
+.wf-toolbar-left,.wf-toolbar-right{display:flex;align-items:center;gap:6px}
+.wf-toolbar select{background:var(--surface-input);border:1px solid var(--glass-border);color:var(--text);padding:6px 12px;border-radius:var(--r-pill);font-family:var(--mono);font-size:.72rem;outline:none;min-width:160px;cursor:pointer}
+
+/* Node palette (add node panel) */
+.wf-palette{position:absolute;top:10px;left:10px;z-index:5;background:var(--surface-solid);border:1px solid var(--glass-border);border-radius:var(--r-md);padding:10px;min-width:160px;max-height:calc(100% - 20px);overflow-y:auto;box-shadow:var(--shadow-md)}
+.wf-palette h4{font-size:.7rem;color:var(--text-tertiary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em}
+.wf-palette-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-sm);cursor:pointer;font-size:.72rem;font-weight:500;color:var(--text-secondary);transition:all .2s}
+.wf-palette-item:hover{background:var(--accent-dim);color:var(--accent)}
+.wf-palette-item .icon{font-size:1rem;width:20px;text-align:center}
+
+/* Canvas */
+.wf-canvas{position:relative;width:100%;height:calc(100vh - 160px);min-height:500px;background:var(--surface-code);border-radius:var(--r-md);overflow:hidden;border:1px solid var(--glass-border)}
+.wf-canvas .grid-bg{position:absolute;inset:0;background-image:radial-gradient(circle,var(--text-quaternary) .5px,transparent .5px);background-size:20px 20px;opacity:.3}
+
+/* SVG connections */
+.wf-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.wf-svg path{fill:none;stroke:var(--accent);stroke-width:2;opacity:.6}
+.wf-svg path.active{opacity:1;stroke-width:2.5}
+.wf-svg path.error{stroke:var(--red)}
+.wf-svg path.done{stroke:var(--green)}
+.wf-svg .conn-hitarea{fill:none;stroke:transparent;stroke-width:12;cursor:pointer;pointer-events:stroke}
+
+/* Nodes */
+.wf-nodes{position:absolute;inset:0;z-index:2}
+.wf-node{position:absolute;min-width:180px;background:var(--surface-solid);border:1px solid var(--glass-border);border-radius:var(--r-md);box-shadow:var(--shadow-sm);cursor:grab;user-select:none;transition:box-shadow .2s}
+.wf-node:hover{box-shadow:var(--shadow-md)}
+.wf-node.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+.wf-node.running{border-color:var(--blue);animation:nodePulse 1.5s infinite}
+.wf-node.done{border-color:var(--green)}
+.wf-node.error{border-color:var(--red)}
+@keyframes nodePulse{0%,100%{box-shadow:0 0 0 2px var(--accent-dim)}50%{box-shadow:0 0 0 6px var(--accent-dim)}}
+.wf-node-head{display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid var(--divider);font-size:.72rem;font-weight:600;color:var(--text)}
+.wf-node-head .nicon{font-size:.9rem}
+.wf-node-head .ntype{color:var(--text-tertiary);font-weight:400;font-size:.6rem;margin-left:auto}
+.wf-node-body{padding:8px 12px;font-size:.68rem;color:var(--text-secondary);min-height:30px}
+.wf-node-ports{display:flex;justify-content:space-between;padding:4px 0}
+.wf-node-ports-in,.wf-node-ports-out{display:flex;flex-direction:column;gap:4px}
+.wf-node-ports-out{align-items:flex-end}
+.wf-port{width:12px;height:12px;border-radius:50%;border:2px solid var(--glass-border);background:var(--surface);cursor:crosshair;transition:all .15s;position:relative}
+.wf-port:hover{border-color:var(--accent);background:var(--accent-dim);transform:scale(1.3)}
+.wf-port.connected{background:var(--accent);border-color:var(--accent)}
+.wf-port.in{margin-left:-16px;margin-right:4px}
+.wf-port.out{margin-right:-16px;margin-left:4px}
+.wf-port-label{font-size:.55rem;color:var(--text-tertiary);position:absolute;top:50%;transform:translateY(-50%);white-space:nowrap}
+.wf-port.in .wf-port-label{left:18px}
+.wf-port.out .wf-port-label{right:18px}
+
+/* Config panel */
+.wf-panel{position:absolute;right:10px;top:10px;width:300px;max-height:calc(100vh - 240px);overflow-y:auto;z-index:10;border-radius:var(--r-md);box-shadow:var(--shadow-lg)}
+.wf-panel-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--divider);font-size:.78rem;font-weight:600}
+.wf-panel-body{padding:14px 16px}
+.wf-panel-body .fld{margin-bottom:12px}
+.wf-panel-body .fld label{font-size:.62rem;color:var(--text-tertiary);margin-bottom:4px;display:block;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.wf-panel-body .fld input,.wf-panel-body .fld select,.wf-panel-body .fld textarea{width:100%;font-family:var(--mono);font-size:.76rem;padding:8px 10px;background:var(--surface-input);border:1px solid var(--glass-border);color:var(--text);border-radius:var(--r-sm);outline:none}
+.wf-panel-body .fld textarea{min-height:80px;resize:vertical;line-height:1.5}
+
+/* Output panel */
+.wf-output{position:absolute;bottom:10px;left:10px;right:320px;max-height:200px;z-index:10;border-radius:var(--r-md);box-shadow:var(--shadow-lg)}
+.wf-output-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--divider);font-size:.76rem;font-weight:600}
+.wf-output-body{padding:12px 16px;font-family:var(--mono);font-size:.72rem;color:var(--text-secondary);max-height:140px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+
+/* File upload zone */
+.upload-zone{border:2px dashed var(--glass-border);border-radius:var(--r-md);padding:30px;text-align:center;color:var(--text-tertiary);cursor:pointer;transition:all .3s}
+.upload-zone:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.upload-zone input{display:none}
+
+/* PM Agent project cards */
+.pm-project-card{background:var(--surface);border:1px solid var(--glass-border);border-radius:var(--r-md);padding:14px 18px;margin-bottom:8px;cursor:pointer;transition:all .25s var(--ease-expo)}
+.pm-project-card:hover{background:var(--surface-hover);border-color:var(--accent);transform:translateY(-1px)}
+.pm-project-card.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+.pm-project-card h4{font-size:.88rem;font-weight:600;color:var(--text)}
+.pm-project-card p{font-size:.72rem;color:var(--text-tertiary);margin-top:4px}
+.pm-project-list{max-height:calc(100vh - 400px);overflow-y:auto;padding:8px 0}
+
+/* Search result items */
+.search-result{padding:14px 0;border-bottom:1px solid var(--divider)}
+.search-result:last-child{border-bottom:none}
+.search-result:hover{background:var(--surface-hover);margin:0 -10px;padding-left:10px;padding-right:10px;border-radius:var(--r-sm)}
+.search-result h4{font-size:.84rem;font-weight:600;color:var(--accent);margin-bottom:4px}
+.search-result p{font-size:.76rem;color:var(--text-secondary);line-height:1.6}
+.search-result .url{font-size:.65rem;color:var(--text-tertiary);font-family:var(--mono);margin-top:4px}
+
+@media(max-width:900px){.app{padding:4px;gap:4px}.main{grid-template-columns:1fr}.sb{display:none}.topbar,.content{border-radius:var(--r-md)}}
+</style>
+</head>
+<body>
+<div class="bg-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+<div class="app">
+  <div class="topbar glass-strong">
+    <div class="dot idle" id="dot"></div>
+    <div class="brand">cx2118 <span>Weaver</span></div>
+    <div class="ver">v9.3</div>
+    <div class="ver" style="background:var(--red-dim);color:var(--red);border-color:var(--red-border)">DEV</div>
+    <div class="ver" id="wsName" style="background:var(--green-dim);color:var(--green);border-color:var(--green-border);cursor:pointer" onclick="openDr('wsArchives')" title="管理工作区">workspace</div>
+    <div class="pill" id="ph">空闲</div>
+    <div class="spacer"></div>
+    <button class="tb mode-btn active" id="modePipeline" onclick="switchMode('pipeline')" title="Build — 完整编码模式，可直接创建/修改文件 (快捷键 Tab)">⚡ Build</button>
+    <button class="tb mode-btn" id="modeWorkflow" onclick="switchMode('workflow')" title="Compose — 可视化工作流编排模式 (快捷键 Tab)">🔗 Compose</button>
+    <button class="tb mode-btn" id="modePMAgent" onclick="switchMode('pm_agent')" title="Plan — 需求讨论与规划模式，修改需审批 (快捷键 Tab)">📋 Plan</button>
+    <button class="tb" onclick="openDr('searchDr')">🔍 搜索</button>
+    <button class="tb" onclick="openDr('skills')">技能库</button>
+    <button class="tb" onclick="openDr('files')">📁 文件</button>
+    <button class="tb" onclick="openDr('snapList')">💾 快照</button>
+    <button class="tb" onclick="openDr('settings')">设置</button>
+    <button class="tb" onclick="openDr('plugins')">插件</button>
+    <button class="tb" id="thB" onclick="toggleTheme()">☀</button>
+    <button class="tb" id="glassB" onclick="toggleGlass()" title="切换磨砂玻璃效果">◇</button>
+    <button class="tb" onclick="doReset()">重置</button>
+  </div>
+  <div class="main">
+    <div class="sb glass">
+      <div class="sb-sec">
+        <div class="sb-title">项目</div>
+        <div class="sb-row"><span class="sb-lb">阶段</span><span class="sb-vl" id="mPh">空闲</span></div>
+        <div class="sb-row"><span class="sb-lb">需求</span><span class="sb-vl no" id="mReq">无</span></div>
+        <div class="sb-row"><span class="sb-lb">规划</span><span class="sb-vl no" id="mPlan">无</span></div>
+        <div class="sb-row"><span class="sb-lb">Python</span><span class="sb-vl no" id="mPy">—</span></div>
+        <div class="sb-row"><span class="sb-lb">HTML</span><span class="sb-vl no" id="mHtml">—</span></div>
+        <div class="sb-row"><span class="sb-lb">审查</span><span class="sb-vl no" id="mReview">—</span></div>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-sec">
+        <div class="sb-title">Token</div>
+        <div class="sb-row"><span class="sb-lb">Token</span><div class="meter"><div class="meter-f" id="mf" style="width:0"></div></div><span class="sb-vl" id="mb">0%</span></div>
+        <div style="font-size:.58rem;color:var(--text-tertiary);margin-top:3px;font-family:var(--mono)" id="mbd">0 / 10,000,000</div>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-sec"><div class="sb-title">技能</div><div id="sbSk" style="min-height:20px"></div></div>
+      <div class="sb-divider"></div>
+      <div class="sb-sec" id="sbModeSec"><div class="sb-title">模式</div><div class="sb-row" style="gap:6px;flex-wrap:wrap"><button class="tb sm pri" id="sbModePipeline" onclick="switchMode('pipeline')" style="flex:1;min-width:70px">⚡ 构建</button><button class="tb sm" id="sbModeWorkflow" onclick="switchMode('workflow')" style="flex:1;min-width:70px">🔗 编排</button><button class="tb sm" id="sbModePMAgent" onclick="switchMode('pm_agent')" style="flex:1;min-width:70px">📋 规划</button></div></div>
+      <div class="sb-divider"></div>
+      <div class="sb-sec" id="sbWfFilesSec" style="display:none"><div class="sb-title">工作流</div><div class="sb-row"><span class="sb-lb">节点</span><span class="sb-vl" id="sbWfNodeCount">0</span></div><div class="sb-row"><span class="sb-lb">连接</span><span class="sb-vl" id="sbWfConnCount">0</span></div></div>
+      <div class="sb-divider" id="sbWfFilesDiv" style="display:none"></div>
+      <div class="sb-sec"><div class="sb-title">插件</div><div id="sbPlugins" style="min-height:20px"><span style="font-size:.65rem;color:var(--text-tertiary)">加载中...</span></div></div>
+    </div>
+    <div class="content glass">
+      <div class="views">
+        <div class="view active" id="vReq"></div>
+        <div class="view" id="vPlan"></div>
+        <div class="view" id="vCode">
+          <div class="cp glass-code" id="cpPanel">
+            <div class="cp-head">
+              <div class="cp-tabs" id="cpTabsContainer">
+                <span class="cp-tab active" data-file="python" onclick="switchCP(this)">main.py</span>
+                <span class="cp-tab" data-file="html" onclick="switchCP(this)" id="cpTabH" style="display:none">index.html</span>
+                <span class="cp-tab" style="color:var(--text-tertiary);font-size:.7rem;cursor:pointer" onclick="addNewBuildTab()" title="添加文件标签">+</span>
+              </div>
+              <div class="cp-right"><span class="cp-count" id="cpCount">0 行</span><span class="cp-toggle" id="cpTog" onclick="toggleCP()">▼</span></div>
+            </div>
+            <div class="cp-body" id="cpBody"><div class="cp-empty">等待编码...</div></div>
+          </div>
+          <div class="stream-panel glass-code" id="streamPanel" style="display:none">
+            <div class="stream-head"><span class="label"><span class="spinner" id="streamSpinner"></span> AI 输出</span><span style="font-size:.65rem;color:var(--text-tertiary);font-family:var(--mono)" id="streamLen">0 字符</span></div>
+            <div class="stream-body empty" id="streamBody">等待 AI 输出...</div>
+          </div>
+          <div class="html-live glass-code" id="htmlLive" style="display:none">
+            <div class="html-live-head"><span class="label">◆ 实时预览</span><button class="tb sm" onclick="refreshLive()">刷新</button></div>
+            <div class="html-live-body"><iframe id="liveFrame"></iframe></div>
+          </div>
+          <div class="rf-panel glass" id="rfPanel" style="display:none">
+            <div class="rf-head"><span>◆ AI 审查结果</span><span class="rf-count" id="rfCount">0 个问题</span></div>
+            <div class="rf-body" id="rfBody"></div>
+            <div class="rf-actions"><button class="tb sm" onclick="acceptAllRF()">✓ 全部接受</button><button class="tb sm" onclick="rejectAllRF()">✗ 全部跳过</button><div class="spacer"></div><button class="tb sm pri" onclick="proceedReview()">继续 →</button></div>
+          </div>
+          <div id="codeStream"></div>
+        </div>
+        <div class="view" id="vReview">
+          <div class="rp glass-code" id="rpPanel">
+            <div class="rp-head">
+              <div class="rp-tabs"><span class="rp-tab active" data-file="python" onclick="switchRP(this)">main.py</span><span class="rp-tab" data-file="html" onclick="switchRP(this)" id="rpTabH" style="display:none">index.html</span></div>
+              <div class="rp-right"><span class="rp-file" id="rpFile">main.py</span><span class="rp-count" id="rpCount">0 行</span></div>
+            </div>
+            <div class="rp-body" id="rpBody"><div class="cp-empty">加载中...</div></div>
+          </div>
+        </div>
+        <div class="view" id="vPMAgent">
+          <div class="pm-header" style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <h3 style="font-weight:700;font-size:1.1rem">📋 Plan 模式 — 项目管理</h3>
+            <button class="tb sm pri" onclick="pmNewProject()">+ 新建项目</button>
+            <span style="font-size:.68rem;color:var(--text-tertiary);margin-left:auto">文件修改需审批后生效</span>
+          </div>
+          <div id="pmProjectList" class="pm-project-list" style="flex:1;overflow-y:auto"></div>
+          <div id="pmToolbar" style="display:none;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+            <button class="tb sm pri" onclick="pmGenerateDoc()">📝 生成需求文档</button>
+            <button class="tb sm" onclick="pmBackToList()">← 返回列表</button>
+            <button class="tb sm" onclick="pmDeleteProject()" style="color:var(--red)">🗑 删除项目</button>
+            <div class="spacer"></div>
+            <label class="check-label" style="font-size:.65rem"><input type="checkbox" id="cbSkipConfirm" onchange="localStorage.setItem('w3skipConfirm',this.checked?'1':'0')"> 直接操作不确认</label>
+          </div>
+          <div id="pmChatArea" style="display:none;flex:1;overflow:hidden;flex-direction:column">
+            <div id="pmTerminal" style="flex:1;overflow-y:auto;padding:12px 16px;font-family:var(--mono);font-size:.78rem;line-height:1.6;background:var(--surface-code);border-radius:var(--r-md);margin:0 0 8px 0;border:1px solid var(--glass-border)"></div>
+          </div>
+          <div class="pm-input-bar" id="pmInputBar" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--glass-border);border-radius:var(--r-md);flex-shrink:0">
+            <span style="color:var(--accent);font-size:1rem;font-weight:800">❯</span>
+            <input id="pmInput" style="flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:.9rem;padding:8px 0" placeholder="描述你的需求..." onkeydown="if(event.key==='Enter')sendPmMsg()">
+            <button onclick="sendPmMsg()" style="background:var(--accent);color:#fff;border:none;padding:8px 20px;border-radius:var(--r-pill);font-family:var(--sans);font-size:.78rem;font-weight:700;cursor:pointer">发送</button>
+          </div>
+        </div>
+        <div class="view" id="vWorkflow">
+          <div class="wf-toolbar glass" id="wfToolbar">
+            <div class="wf-toolbar-left">
+              <select id="wfSelect" onchange="loadWF(this.value)"></select>
+              <button class="tb sm" onclick="newWF()">+ 新建</button>
+              <button class="tb sm" onclick="deleteWF()">删除</button>
+              <button class="tb sm" onclick="importWFPackage()">📦 导入包</button>
+            </div>
+            <div class="wf-toolbar-right">
+              <button class="tb sm" onclick="uploadFileWF()">上传文件</button>
+              <button class="tb sm" onclick="rollbackWF()">↩ 回退</button>
+              <button class="tb sm pri" onclick="executeWF()">▶ 执行</button>
+              <button class="tb sm" onclick="stopWF()">■ 停止</button>
+            </div>
+          </div>
+          <div class="wf-canvas" id="wfCanvas" onclick="if(event.target===this||event.target.classList.contains('grid-bg'))closeWFPanel()">
+            <div class="grid-bg"></div>
+            <svg class="wf-svg" id="wfSvg"></svg>
+            <div class="wf-nodes" id="wfNodes"></div>
+          </div>
+          <div class="wf-panel glass" id="wfPanel" style="display:none">
+            <div class="wf-panel-head"><span id="wfPanelTitle">节点配置</span><button class="close" onclick="closeWFPanel()">✕</button></div>
+            <div class="wf-panel-body" id="wfPanelBody"></div>
+          </div>
+          <div class="wf-output glass" id="wfOutput" style="display:none">
+            <div class="wf-output-head"><span>执行输出</span><button class="close" onclick="$('wfOutput').style.display='none'">✕</button></div>
+            <div class="wf-output-body" id="wfOutputBody"></div>
+          </div>
+        </div>
+      </div>
+      <div class="act-bar hidden" id="actReq"><button class="tb pri" onclick="pmApprove()">确认需求</button><button class="tb" onclick="focusIn()">继续对话</button></div>
+      <div class="act-bar hidden" id="actPlan"><button class="tb pri" onclick="startCode()">开始编码</button><button class="tb" onclick="dirPlan()">重新规划</button></div>
+      <div class="act-bar hidden" id="actCode"><button class="tb pri" onclick="goReview()">代码通过</button><button class="tb" onclick="startCode()">重新编码</button><label class="check-label"><input type="checkbox" id="cbAutoReview" checked> AI审查自动修复</label></div>
+      <div class="act-bar hidden" id="actReview"><button class="tb pri" onclick="doReset()">完成</button><button class="tb" onclick="genSkill()">生成技能</button><button class="tb" onclick="startCode()">继续修改</button></div>
+      <div class="input-bar" id="mainInputBar"><span class="ic">❯</span><input id="ti" placeholder="描述你的需求..." onkeydown="if(event.key==='Enter')sendMsg()"><select id="mainModelSelect" style="display:none;background:var(--surface-input);border:1px solid var(--glass-border);color:var(--text);padding:6px 10px;border-radius:var(--r-pill);font-family:var(--mono);font-size:.72rem;outline:none;min-width:100px"><option value="">默认模型</option><option value="deepseek-v4-flash">deepseek-v4-flash</option><option value="deepseek-v4-pro">deepseek-v4-pro</option><option value="gpt-4o">gpt-4o</option><option value="gpt-4o-mini">gpt-4o-mini</option></select><button class="send" id="sBtn" onclick="sendMsg()">发送</button></div>
+    </div>
+  </div>
+</div>
+<div class="drawer-bg" id="dbg" onclick="closeDrs()"></div>
+<div class="drawer" id="setDr"><div class="dh"><h2>设置</h2><button class="close" onclick="closeDrs()">✕</button></div><div class="db"><div class="tabs"><div class="tab active" onclick="sTab(this,'providers')">服务商</div><div class="tab" onclick="sTab(this,'agents')">智能体</div><div class="tab" onclick="sTab(this,'style')">风格设置</div></div><div class="tc active" id="tc-providers"></div><div class="tc" id="tc-agents"></div><div class="tc" id="tc-style"></div></div><div class="df"><button class="tb sm" onclick="exportSettings()">📤 导出</button><button class="tb sm" onclick="importSettings()">📥 导入</button><div class="spacer"></div><button class="tb" onclick="closeDrs()">取消</button><button class="tb pri" onclick="saveAll()">保存</button></div></div>
+<div class="drawer" id="skDr"><div class="dh"><h2>技能文件</h2><button class="close" onclick="closeDrs()">✕</button></div><div class="db" id="skBody"></div><div class="df"><button class="tb" onclick="newSkill()">+ 新建</button></div></div>
+<div class="drawer" id="plDr"><div class="dh"><h2>插件管理</h2><button class="close" onclick="closeDrs()">✕</button></div><div class="db"><div id="plBody"><p style="color:var(--text-tertiary);text-align:center;padding:20px">加载插件中...</p></div></div><div class="df"><button class="tb" onclick="refreshPlugins()">刷新</button><button class="tb" onclick="discoverPlugins()">发现</button><div class="spacer"></div><button class="tb" onclick="closeDrs()">关闭</button></div></div>
+<div class="drawer" id="searchDr">
+  <div class="dh"><h2>网络搜索</h2><button class="close" onclick="closeDrs()">✕</button></div>
+  <div class="db">
+    <div class="input-bar" style="border:none;padding:0;margin-bottom:14px">
+      <input id="searchInput" placeholder="搜索..." onkeydown="if(event.key==='Enter')doWebSearch()">
+      <button class="send" onclick="doWebSearch()">搜索</button>
+    </div>
+    <div id="searchResults"></div>
+  </div>
+</div>
+<div class="drawer" id="snapDr"><div class="dh"><h2>对话快照</h2><button class="close" onclick="closeDrs()">✕</button></div><div class="db" id="snapListBody"><div style="color:var(--text-tertiary);text-align:center;padding:20px">加载中...</div></div><div class="df"><button class="tb pri" onclick="saveConversation()">💾 保存当前</button><div class="spacer"></div><button class="tb" onclick="closeDrs()">关闭</button></div></div>
+<div class="drawer" id="filesDr"><div class="dh"><h2>项目文件</h2><button class="close" onclick="closeDrs()">✕</button></div><div class="db" id="fileListBody"><div style="color:var(--text-tertiary);text-align:center;padding:20px">加载中...</div></div><div class="df"><button class="tb" onclick="loadFileList()">刷新</button><div class="spacer"></div><button class="tb" onclick="closeDrs()">关闭</button></div></div>
+<div class="drawer" id="wsArchDr"><div class="dh"><h2>工作区管理</h2><button class="close" onclick="closeDrs()">✕</button></div><div class="db"><div id="wsInfoPanel" style="margin-bottom:16px"></div><div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><button class="tb sm pri" onclick="wsArchive()">📦 归档当前</button><button class="tb sm" onclick="wsNew()">+ 新建工作区</button><button class="tb sm" onclick="loadWsInfo()">🔄 刷新</button></div><div class="sb-title">归档列表</div><div id="wsArchiveList"><div style="color:var(--text-tertiary);text-align:center;padding:16px">加载中...</div></div></div><div class="df"><button class="tb" onclick="closeDrs()">关闭</button></div></div>
+<div class="modal-bg" id="skMod"><div class="modal"><div class="flex items-c"><strong style="font-size:.95rem;flex:1">编辑技能</strong><button class="close" onclick="closeSkMod()" style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:1rem">✕</button></div><div class="fld mt2"><label>文件名</label><input id="skFn" placeholder="skill_name.md"></div><div class="fld"><label>内容</label><textarea id="skCt" style="min-height:180px"></textarea></div><div class="flex gap8 justify-e"><button class="tb" onclick="closeSkMod()">取消</button><button class="tb pri" onclick="saveSkill()">保存</button></div></div></div>
+<div class="modal-bg" id="plMod"><div class="modal"><div class="flex items-c"><strong style="font-size:.95rem;flex:1" id="plModTitle">插件配置</strong><button class="close" onclick="closePlMod()" style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:1rem">✕</button></div><div id="plModBody" style="margin-top:14px"></div><div class="flex gap8 justify-e" style="margin-top:16px"><button class="tb" onclick="closePlMod()">取消</button><button class="tb pri" onclick="savePlConfig()">保存</button></div></div></div>
+
+<script>
+var A='';
+var es=null,phase='idle',isThinking=false;
+var provCfg={},agentCfg={};
+var _tb='',_thinkTimer=null,_scrollRaf=null;
+var _pf='python',_pd={python:[],html:[]},_pyL=0,_htmlL=0,_needsPy=true,_needsHtml=false;
+var _reviewFindings=[];
+var _streamBuf='',_streamActive=false;
+var _sessionActive=false;
+var _phOrder={idle:0,requirements:1,planning:2,coding:3,review:4};
+
+// ═══════════════ Polling Mechanism ═══════════════
+var pollLastTs = 0;
+var pollTimer = null;
+var _handledSeqs = new Set();
+var _snapshotMsgIdx = 0;
+
+function $(id){return document.getElementById(id)}
+function e2(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function cleanAI(text){return text.replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<reasoning>[\s\S]*?<\/reasoning>/gi,'').replace(/<thinking>[\s\S]*?<\/thinking>/gi,'').replace(/<thought>[\s\S]*?<\/thought>/gi,'').replace(/\[thinking\][\s\S]*?\[\/thinking\]/gi,'').replace(/<br\s*\/?>/gi,'\n').replace(/&nbsp;/g,' ').replace(/\\n/g,'\n').replace(/\\t/g,'\t').replace(/\r\n/g,'\n').replace(/\r/g,'\n').replace(/\n{3,}/g,'\n\n').trim()}
+function ts2(){return new Date().toLocaleTimeString('zh-CN',{hour12:false})}
+
+var _pmStreamEl=null,_pmStreamBuf='',_pmStreamTimer=null,_pmStreamCount=0,_pmStreamDone=false;
+var _pmTerminal=null,_pmStreamStartTime=0,_reasonBuf='';
+function pmStreamStart(){
+  _pmStreamBuf='';_pmStreamCount=0;_pmStreamTimer=null;_pmStreamDone=false;_pmStreamStartTime=Date.now();_reasonBuf='';
+  var chatArea=$('pmChatArea');
+  if(chatArea){chatArea.style.display='flex';chatArea.style.flexDirection='column';chatArea.style.height='calc(100vh - 120px)'}
+  _pmTerminal=$('pmTerminal');
+}
+function pmStreamAppend(t){
+  if(!_pmTerminal)return;
+  _pmStreamBuf+=t;_pmStreamCount++;
+  if(!_pmStreamTimer){
+    _pmStreamTimer=setTimeout(function(){
+      _pmStreamTimer=null;_pmStreamCount=0;
+      var body=document.getElementById('pmReasonBody');
+      if(body)body.textContent=(_reasonBuf?_reasonBuf+'\n---\n':'')+_pmStreamBuf;
+    },150);
+  }
+}
+function pmStreamEnd(msg){
+  if(_pmStreamTimer){clearTimeout(_pmStreamTimer);_pmStreamTimer=null}
+  var rb=document.getElementById('pmReasonBlock');
+  if(rb){
+    var elapsed=Date.now()-(_pmStreamStartTime||Date.now());
+    var hdr=rb.querySelector('div');
+    if(hdr)hdr.childNodes[1].textContent=' Thought: '+elapsed+'ms';
+    var body=document.getElementById('pmReasonBody');
+    if(body&&_pmStreamBuf)body.textContent=(_reasonBuf?_reasonBuf+'\n---\n':'')+_pmStreamBuf;
+  }
+  _pmStreamEl=null;_pmStreamBuf='';_pmStreamCount=0;_pmStreamDone=true;
+}
+function pmTerminalLog(type,text,extra){
+  if(!_pmTerminal)_pmTerminal=$('pmTerminal');
+  if(!_pmTerminal)return;
+  var d=document.createElement('div');
+  if(type==='thought'){
+    var thinkId='think_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    d.style.cssText='margin:3px 0;padding:0;border-radius:6px;border:1px solid var(--divider);overflow:hidden';
+    var hdr=document.createElement('div');
+    hdr.style.cssText='cursor:pointer;padding:6px 10px;display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text-tertiary);user-select:none';
+    var arrow=document.createElement('span');
+    arrow.style.cssText='transition:transform .2s';
+    arrow.textContent='\u25b8';
+    hdr.appendChild(arrow);
+    hdr.appendChild(document.createTextNode(' Thought: '));
+    var preview=document.createElement('span');
+    preview.style.cssText='color:var(--text-secondary);font-family:var(--mono)';
+    preview.textContent=e2(text.slice(0,80))+(text.length>80?'...':'');
+    hdr.appendChild(preview);
+    var body=document.createElement('div');
+    body.id=thinkId;
+    body.style.cssText='display:none;padding:8px 12px;font-size:.72rem;color:var(--text-secondary);line-height:1.5;max-height:200px;overflow-y:auto;border-top:1px solid var(--divider)';
+    body.innerHTML=e2(text).replace(/\n/g,'<br>');
+    d.appendChild(hdr);
+    d.appendChild(body);
+    hdr.onclick=function(){var el=document.getElementById(thinkId);el.style.display=el.style.display==='none'?'block':'none';arrow.textContent=el.style.display==='none'?'\u25b8':'\u25be';};
+  }else if(type==='tool_call'){
+    var tcId='tc_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    var args=extra?JSON.stringify(extra):'';
+    var argsPreview=args.length>80?args.slice(0,80)+'...':args;
+    d.style.cssText='margin:2px 0;border-radius:4px;border-left:3px solid var(--blue);overflow:hidden;font-size:.72rem';
+    var hdr=document.createElement('div');
+    hdr.style.cssText='padding:3px 8px;background:rgba(64,144,255,.05);cursor:pointer;display:flex;align-items:center;gap:4px;color:var(--blue);font-weight:600;user-select:none';
+    hdr.innerHTML='<span style="font-size:.6rem">\u25b8</span> \u25b6 '+e2(text);
+    var body=document.createElement('div');
+    body.id=tcId;
+    body.style.cssText='display:none;padding:4px 8px;font-size:.68rem;color:var(--text-secondary);font-family:var(--mono);white-space:pre-wrap;word-break:break-all;background:rgba(64,144,255,.03);border-top:1px solid var(--divider);max-height:120px;overflow-y:auto';
+    body.textContent=argsPreview||'(no args)';
+    d.appendChild(hdr);d.appendChild(body);
+    (function(b,a){hdr.onclick=function(){b.style.display=b.style.display==='none'?'block':'none';a.textContent=b.style.display==='none'?'\u25b8':'\u25be'}})(body,hdr.querySelector('span'));
+  }else if(type==='tool_result'){
+    var ok=extra&&extra.success!==false&&!extra.error;
+    var c=ok?'var(--green)':'var(--red)';
+    var trId='tr_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    var detail=e2(text);
+    var brief=detail.length>60?detail.slice(0,60)+'...':detail;
+    d.style.cssText='margin:1px 0;border-radius:4px;border-left:2px solid '+c+';overflow:hidden;font-size:.72rem';
+    var hdr=document.createElement('div');
+    hdr.style.cssText='padding:2px 8px;cursor:pointer;display:flex;align-items:center;gap:4px;user-select:none';
+    hdr.innerHTML='<span style="font-size:.6rem">\u25b8</span> <span style="color:'+c+'">\u25c0</span> <span style="color:var(--text-secondary)">'+brief+'</span>';
+    var body=document.createElement('div');
+    body.id=trId;
+    body.style.cssText='display:none;padding:4px 8px;font-size:.68rem;color:var(--text-secondary);font-family:var(--mono);white-space:pre-wrap;word-break:break-all;max-height:120px;overflow-y:auto;border-top:1px solid var(--divider)';
+    body.textContent=detail;
+    d.appendChild(hdr);d.appendChild(body);
+    (function(b,a){hdr.onclick=function(){b.style.display=b.style.display==='none'?'block':'none';a.textContent=b.style.display==='none'?'\u25b8':'\u25be'}})(body,hdr.querySelector('span'));
+  }else if(type==='response'){
+    var cleanText=cleanAI(text);
+    var formatted=e2(cleanText).replace(/\n/g,'<br>');
+    d.style.cssText='margin:6px 0;padding:12px 16px;background:var(--surface);border:1px solid var(--glass-border);border-radius:12px 12px 12px 4px;max-width:90%';
+    d.innerHTML='<div style="font-size:.6rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">PM</div><div style="font-size:.84rem;line-height:1.75;color:var(--text)">'+formatted+'</div>';
+  }else if(type==='error'){
+    d.style.cssText='margin:3px 0;padding:4px 8px;background:var(--red-dim);border-radius:6px;border-left:3px solid var(--red)';
+    d.innerHTML='<span style="color:var(--red);font-weight:600">✗ 错误</span> <span style="color:var(--red)">'+e2(text)+'</span>';
+  }else{
+    d.style.cssText='margin:2px 0;padding:2px 8px;color:var(--text-tertiary)';
+    d.innerHTML='<span style="color:var(--text-secondary)">'+e2(text)+'</span>';
+  }
+  _pmTerminal.appendChild(d);
+}
+
+var _pendingToolApproval=null;
+function showToolPermission(ev){
+  _pendingToolApproval=ev;
+  var bg=document.createElement('div');bg.id='toolPermBg';bg.className='modal-bg open';
+  var tool=ev.tool||'';
+  var args=ev.args||{};
+  var detail='';
+  if(tool==='write_file')detail='创建/覆盖文件: '+e2(args.filename||'');
+  else if(tool==='patch_file')detail='修改文件: '+e2(args.filename||'');
+  else if(tool==='delete_file')detail='删除文件: '+e2(args.filename||'');
+  var countdown=10;
+  bg.innerHTML='<div class="modal" style="max-width:420px">'
+    +'<div style="font-size:1.2rem;margin-bottom:8px">⚠️ 文件操作确认</div>'
+    +'<div style="font-size:.85rem;color:var(--text-secondary);margin-bottom:16px">'+detail+'</div>'
+    +'<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'
+    +'<button class="tb pri" id="permAllow">✓ 允许</button>'
+    +(tool!=='delete_file'?'<button class="tb" id="permAlways" style="background:var(--green-dim);color:var(--green);border-color:var(--green-border)">✓ 始终允许</button>':'')
+    +'<button class="tb" id="permReject" style="color:var(--red)">✗ 拒绝</button>'
+    +'</div>'
+    +'<div style="text-align:center;margin-top:10px;font-size:.7rem;color:var(--text-tertiary)" id="permCount">'+countdown+'s 后自动拒绝</div>'
+    +'</div>';
+  document.body.appendChild(bg);
+  var timer=setInterval(function(){
+    countdown--;
+    var el=document.getElementById('permCount');
+    if(el)el.textContent=countdown+'s 后自动拒绝';
+    if(countdown<=0){clearInterval(timer);rejectToolPermission()}
+  },1000);
+  document.getElementById('permAllow').onclick=function(){clearInterval(timer);approveToolPermission(false,tool)};
+  var alwaysBtn=document.getElementById('permAlways');
+  if(alwaysBtn)alwaysBtn.onclick=function(){clearInterval(timer);approveToolPermission(true,tool)};
+  document.getElementById('permReject').onclick=function(){clearInterval(timer);rejectToolPermission()};
+}
+function approveToolPermission(always,tool){
+  if(always){
+    // write/patch 用 localStorage (持久), delete 用 sessionStorage (页面关闭就清)
+    if(tool==='delete_file'){sessionStorage.setItem('w3allowDelete','1')}
+    else{localStorage.setItem('w3skipConfirm','1')}
+  }
+  var bg=document.getElementById('toolPermBg');if(bg)bg.remove();
+  _pendingToolApproval=null;
+}
+function rejectToolPermission(){
+  var bg=document.getElementById('toolPermBg');if(bg)bg.remove();
+  _pendingToolApproval=null;
+}
+
+function initTheme(){
+  if(localStorage.getItem('w3t4')==='dark')document.body.classList.add('dark');
+  if(localStorage.getItem('w3glass')==='off')document.body.classList.add('no-glass');
+  uTb();
+  var gb=document.getElementById('glassB');
+  if(gb&&document.body.classList.contains('no-glass')){gb.textContent='□';gb.title='已关闭磨砂效果 (点击开启)'}
+  var cc=document.getElementById('cbSkipConfirm');
+  if(cc&&localStorage.getItem('w3skipConfirm'))cc.checked=true;
+}
+function toggleTheme(){document.body.classList.toggle('dark');localStorage.setItem('w3t4',document.body.classList.contains('dark')?'dark':'light');uTb()}
+function uTb(){var b=document.getElementById('thB');if(b)b.textContent=document.body.classList.contains('dark')?'◉':'☀'}
+function toggleGlass(){
+  document.body.classList.toggle('no-glass');
+  localStorage.setItem('w3glass',document.body.classList.contains('no-glass')?'off':'on');
+  var b=document.getElementById('glassB');
+  if(b)b.textContent=document.body.classList.contains('no-glass')?'□':'◇';
+  if(b)b.title=document.body.classList.contains('no-glass')?'已关闭磨砂效果 (点击开启)':'磨砂玻璃效果 (点击关闭)';
+}
+
+var _pollStarted=false;
+function cSSE(){
+  if(es)es.close();
+  try{es=new EventSource(A+'/api/stream')}catch(e){return}
+  es.onmessage=function(e){try{handleEvent(JSON.parse(e.data))}catch(x){console.error(x)}};
+  es.onerror=function(){es.close();setTimeout(function(){cSSE()},3000)};
+}
+function startPollingOnce(){
+  if(_pollStarted)return;
+  _pollStarted=true;
+  pollTimer=setInterval(async function(){
+    try{
+      var res=await fetch(A+'/api/poll?last_ts='+pollLastTs);
+      var data=await res.json();
+      if(data.events&&data.events.length>0){
+        for(var i=0;i<data.events.length;i++){
+          var ev=data.events[i];
+          if(ev.ts)pollLastTs=Math.max(pollLastTs,ev.ts);
+          handleEvent(ev);
+        }
+      }
+      if(data.current_ts)pollLastTs=Math.max(pollLastTs,data.current_ts);
+    }catch(e){}
+  },8000);
+}
+
+// ═══════════════ Unified Event Handler ═══════════════
+function handleEvent(ev){
+  if(ev._seq!==undefined){
+    if(_handledSeqs.has(ev._seq))return;
+    _handledSeqs.add(ev._seq);
+    if(_handledSeqs.size>2000){var arr=Array.from(_handledSeqs);_handledSeqs=new Set(arr.slice(-1000))}
+  }
+  var T=ev.type;
+  if(T==='snapshot'){
+    var newP=ev.phase||'idle';
+    if(_mode==='pm_agent'){
+      // PM Agent 模式: 不切换 phase/不追加 conversation，保留终端状态
+    }else{
+      if(!(_sessionActive&&_phOrder[newP]<_phOrder[phase])){phase=newP;uPhase()}
+      if(ev.budget)uB(ev.budget);
+      if(ev.requirements){$('mReq').textContent='✓';$('mReq').className='sb-vl ok'}
+      if(ev.structure&&Object.keys(ev.structure).length)uStr(ev.structure);
+      (ev.matched_skills||[]).forEach(function(s){aSk(s)});
+      var conv=ev.conversation||[];
+      if(conv.length<_snapshotMsgIdx){$('vReq').innerHTML='';_snapshotMsgIdx=0}
+      for(var si=_snapshotMsgIdx;si<conv.length;si++){var m=conv[si];aChat(m.role==='user'?'user':'pm',m.content,false)}
+      _snapshotMsgIdx=conv.length;
+      if(ev.review_findings&&ev.review_findings.length){_reviewFindings=ev.review_findings;renderRF()}
+    }
+    return;
+  }
+  if(T==='phase_change'){if(_mode!=='pipeline')return;phase=ev.phase;_sessionActive=true;uPhase()}
+  if(T==='pm_thinking'){if(_mode!=='pipeline')return;isThinking=true;aThink()}
+  if(T==='pm_token'){if(_mode!=='pipeline')return;uThink(ev.token)}
+  if(T==='pm_response'){if(_mode!=='pipeline')return;isThinking=false;rmThink();if(ev.message)aSys(ev.message,'info');scrollSV(true)}
+  if(T==='pm_done'){if(_mode!=='pipeline')return;isThinking=false;rmThink()}
+  if(T==='agent_token'){if(_mode!=='pm_agent')return;pmStreamAppend(ev.token||'')}
+  if(T==='agent_reasoning'){
+    if(_mode!=='pm_agent')return;
+    var rc=ev.content||'';
+    if(!_reasonBuf)_reasonBuf='';
+    _reasonBuf+=rc;
+    var el=document.getElementById('pmReasonBlock');
+    if(!el){
+      el=document.createElement('div');
+      el.id='pmReasonBlock';
+      el.style.cssText='margin:2px 0;padding:0;border-radius:6px;border:1px solid var(--divider);overflow:hidden;font-size:.72rem';
+      var hdr=document.createElement('div');
+      hdr.style.cssText='cursor:pointer;padding:4px 8px;display:flex;align-items:center;gap:5px;color:var(--text-tertiary);user-select:none';
+      var arrow=document.createElement('span');arrow.textContent='\u25b8';
+      hdr.appendChild(arrow);hdr.appendChild(document.createTextNode(' Thinking...'));
+      var body=document.createElement('div');
+      body.id='pmReasonBody';
+      body.style.cssText='display:none;padding:6px 10px;font-size:.7rem;color:var(--text-secondary);line-height:1.5;max-height:200px;overflow-y:auto;border-top:1px solid var(--divider);white-space:pre-wrap;word-break:break-word';
+      el.appendChild(hdr);el.appendChild(body);
+      hdr.onclick=(function(b,a){return function(){b.style.display=b.style.display==='none'?'block':'none';a.textContent=b.style.display==='none'?'\u25b8':'\u25be'}})(body,arrow);
+      if(!_pmTerminal)_pmTerminal=$('pmTerminal');
+      if(_pmTerminal)_pmTerminal.appendChild(el);
+    }
+    var body=document.getElementById('pmReasonBody');
+    if(body)body.textContent=_reasonBuf;
+  }
+  if(T==='agent_response'){if(_mode!=='pm_agent')return;rmThink();isThinking=false;if(!_pmStreamDone){pmStreamEnd();if(ev.message)pmTerminalLog('response',ev.message);}}
+  if(T==='agent_done'){if(_mode!=='pm_agent')return;isThinking=false;rmThink();if(!_pmStreamDone)pmStreamEnd()}
+  if(T==='agent_error'){if(_mode!=='pm_agent')return;isThinking=false;rmThink();if(!_pmStreamDone){pmStreamEnd();pmTerminalLog('error',ev.error||'未知错误')}}
+  if(T==='agent_tool_call'){
+    if(_mode!=='pm_agent')return;
+    var tool=ev.tool||'';
+    var args=ev.args||{};
+    var desc=tool;
+    if(tool==='read_file')desc='📄 读取 '+e2(args.filename||'');
+    else if(tool==='read_file_lines')desc='📄 读取 '+e2(args.filename||'')+' L'+(args.start||1)+'-'+(args.end||'end');
+    else if(tool==='create_file')desc='✨ 新建 '+e2(args.filename||'');
+    else if(tool==='write_file')desc='📝 写入 '+e2(args.filename||'');
+    else if(tool==='patch_file')desc='✏️ 修改 '+e2(args.filename||'');
+    else if(tool==='append_file')desc='📎 追加 '+e2(args.filename||'');
+    else if(tool==='rename_file')desc=' renaming '+e2(args.old_name||'')+' → '+e2(args.new_name||'');
+    else if(tool==='delete_file')desc='🗑 删除 '+e2(args.filename||'');
+    else if(tool==='list_workspace')desc='📂 列出文件';
+    else if(tool==='get_cwd')desc='📍 获取路径';
+    else if(tool==='run_code')desc='⚡ 运行代码';
+    else if(tool==='git_init')desc='Git init';
+    else if(tool==='git_commit')desc='Git commit: '+(args.message||'');
+    else if(tool==='git_log')desc='Git log';
+    else if(tool==='git_rollback')desc='Git rollback: '+(args.commit||'');
+    else if(tool==='import_zip')desc='📦 导入: '+(args.url||'');
+    else if(tool==='done')desc='✅ 完成';
+    else desc='🔧 '+tool;
+    pmTerminalLog('tool_call',desc,args);
+  }
+  if(T==='agent_tool_result'){
+    if(_mode!=='pm_agent')return;
+    var r=ev.result||{};
+    var summary='';
+    if(ev.tool==='read_file')summary='✓ '+e2(r.filename||'')+' ('+(r.total_lines||0)+' 行)';
+    else if(ev.tool==='read_file_lines')summary='✓ '+e2(r.showing||'');
+    else if(ev.tool==='create_file')summary='✓ 已创建 ('+(r.lines||0)+' 行)';
+    else if(ev.tool==='write_file')summary='✓ 已写入 ('+(r.size||0)+' 字节)';
+    else if(ev.tool==='patch_file')summary=r.success?'✓ 已修改':'✗ '+e2(r.error||'');
+    else if(ev.tool==='append_file')summary='✓ 已追加 ('+(r.appended||0)+' 字节)';
+    else if(ev.tool==='rename_file')summary=r.success?'✓ '+e2(r.old_name||'')+' → '+e2(r.new_name||''):'✗ '+e2(r.error||'');
+    else if(ev.tool==='delete_file')summary=r.success?'✓ 已删除':'✗ '+e2(r.error||'');
+    else if(ev.tool==='list_workspace')summary='✓ '+(r.files||[]).length+' 个文件';
+    else if(ev.tool==='get_cwd')summary='✓ '+e2(r.workspace||'');
+    else if(ev.tool==='run_code'){summary=r.stdout?'✓ '+r.stdout.trim().slice(0,100):(r.stderr?'✗ '+r.stderr.trim().slice(0,100):'✓ done')}
+    else if(ev.tool==='git_commit')summary='✓ committed';
+    else if(ev.tool==='git_init')summary='✓ repo initialized';
+    else if(ev.tool==='git_log'){var cs=r.commits||[];summary='✓ '+cs.length+' commits'}
+    else if(ev.tool==='done')summary='✅ '+e2(r.summary||'done');
+    else summary=r.error?'✗ '+e2(r.error):'✓ ok';
+    pmTerminalLog('tool_result',summary,r);
+  }
+  if(T==='requirements_saved'){$('mReq').textContent='✓';$('mReq').className='sb-vl ok';aSys('需求文档已保存','success')}
+  if(T==='director_thinking'){if(_mode!=='pipeline')return;if(phase!=='planning')forcePhase('planning');aSys('项目负责人规划中...','info');aThink()}
+  if(T==='director_token'){if(_mode!=='pipeline')return;uThink(ev.token)}
+  if(T==='director_plan'){if(_mode!=='pipeline')return;rmThink();showPlan(ev.structure,ev.raw);uStr(ev.structure)}
+  if(T==='director_done'){if(_mode!=='pipeline')return;showAct('plan')}
+  if(T==='skills_found'){ev.skills.forEach(function(s){aSk(s)})}
+  if(T==='coding_plan'){
+    _needsPy=!!ev.needs_python;_needsHtml=!!ev.needs_html;
+    var parts=[];if(_needsPy)parts.push('Python');if(_needsHtml)parts.push('HTML');
+    aSys('编码计划: '+(parts.join(' + ')||'无'),'info');
+    $('cpTabH').style.display=_needsHtml?'':'none';
+    $('rpTabH').style.display=_needsHtml?'':'none';
+    $('htmlLive').style.display=_needsHtml?'block':'none';
+    if(!_needsPy&&_needsHtml){_pf='html';switchCP(document.querySelector('[data-file="html"].cp-tab'))}
+  }
+  if(T==='coder_start'){
+    forcePhase('coding');
+    var lbl=(ev.coder==='html'?'HTML':'Python');
+    var cs=$('codeStream');
+    if(cs.children.length>0){var sep=document.createElement('div');sep.className='coder-sep';sep.setAttribute('data-label',lbl+' 编程师');cs.appendChild(sep)}
+    aSys(lbl+' 编程师开始...','info');
+    showStream();scrollSV(true);
+  }
+  if(T==='coder_attempt'){aThink();showStream();scrollSV()}
+  if(T==='coder_token'){uThink(ev.token);appendStream(ev.token)}
+  if(T==='edits_applied'){rmThink();finishStream('编辑完成: '+ev.count+' 个操作');aSys('✓ '+ev.count+' 个编辑操作','success');updateLines(ev);scrollSV(true)}
+  if(T==='full_rewrite'){rmThink();finishStream('全量重写完成');aSys('全量重写','warn');updateLines(ev);scrollSV(true)}
+  if(T==='parse_failed'){aSys('解析失败','error')}
+  if(T==='coder_complete'){rmThink();finishStream('编码完成 ('+ev.lines+' lines)');coderDone(ev);scrollSV(true)}
+  if(T==='coder_failed'){rmThink();finishStream('编码失败');aSys('✗ '+(ev.coder||'')+' 失败','error');scrollSV(true)}
+  if(T==='coder_skipped'){finishStream('跳过: '+(ev.reason||''));aSys((ev.coder||'')+' 跳过','dim');scrollSV(true)}
+  if(T==='diff_header'){aDiffH(ev.coder,ev.additions,ev.deletions,ev.changes)}
+  if(T==='diff_add')aDf('da',ev);
+  if(T==='diff_del')aDf('dd',ev);
+  if(T==='diff_mod'){aDf('dm-o',ev);aDf('dm-n',ev)}
+  if(T==='check_result'){if(ev.passed)aSys('✓ 语法检查通过','success');else(ev.errors||[]).forEach(function(e){aSys('· '+e,'error')});scrollSV(true)}
+  if(T==='code_state'){updateCodeState(ev)}
+  if(T==='skill_search'){aSys(ev.found?'已检索 Skill 文档':'Skill 检索无匹配','warn')}
+  if(T==='ai_review_start'){aSys('AI 审查 '+(ev.coder==='python'?'Python':'HTML')+'...','info');scrollSV()}
+  if(T==='ai_review_thinking'){aThink()}
+  if(T==='ai_review_token'){uThink(ev.token)}
+  if(T==='review_findings'){rmThink();_reviewFindings=ev.findings;renderRF();$('mReview').textContent=ev.findings.length+' 问题';$('mReview').className='sb-vl '+(ev.findings.some(function(f){return f.severity==='error'})?'no':'ok');scrollSV(true)}
+  if(T==='review_no_issues'){rmThink();$('mReview').textContent='✓ 无问题';$('mReview').className='sb-vl ok';aSys('AI 审查: 未发现问题','success');scrollSV(true)}
+  if(T==='review_fix_applied'){markRF(ev.id,'applied');aSys('✓ 已应用修复 #'+ev.id,'success');scrollSV(true)}
+  if(T==='review_fix_rejected'){markRF(ev.id,'rejected');aSys('✗ 已跳过 #'+ev.id,'dim');scrollSV(true)}
+  if(T==='review_all_handled'){aSys('所有审查项已处理','success');showAct('code');scrollSV(true)}
+  if(T==='awaiting_review_decision'){showReviewWait()}
+  if(T==='review_ready'){showAct('review');loadReview();aSys('审查阶段','info')}
+  if(T==='error'){rmThink();finishStream('错误: '+ev.message);aSys('✗ '+ev.message,'error');scrollSV(true)}
+  if(T==='reset'){resetUI()}
+  if(T==='config_updated'){aSys('配置已更新','system')}
+  if(T==='plugin_event'){
+    const et=ev.plugin_event_type||'info';
+    aSys('[Plugin:'+ev.plugin+'] '+(ev.message||et),ev.level||'info');
+  }
+  // Workflow events via unified handler
+  if(T==='wf_node_start'){
+    if(_nodes[ev.node_id]){_nodes[ev.node_id]._status='running';renderWFCanvas()}
+    var ob=$('wfOutputBody');if(ob){ob.textContent+='▶ '+ev.node_type+' ('+ev.node_id.slice(0,6)+')...\n';ob.scrollTop=ob.scrollHeight}
+  }
+  if(T==='wf_node_done'){
+    if(_nodes[ev.node_id]){_nodes[ev.node_id]._status='done';renderWFCanvas()}
+    var ob=$('wfOutputBody');if(ob){ob.textContent+='✓ '+ev.node_id.slice(0,6)+'\n';ob.scrollTop=ob.scrollHeight}
+  }
+  if(T==='wf_node_error'){
+    if(_nodes[ev.node_id]){_nodes[ev.node_id]._status='error';renderWFCanvas()}
+    var ob=$('wfOutputBody');if(ob){ob.textContent+='✗ '+ev.error+'\n';ob.scrollTop=ob.scrollHeight}
+  }
+  if(T==='wf_workflow_done'){
+    var ob=$('wfOutputBody');if(ob){ob.textContent+='━━━ 工作流执行完成 ━━━\n';ob.scrollTop=ob.scrollHeight}
+    if(_wfSSE)_wfSSE.close();
+  }
+  scrollSV();
+}
+
+function showStream(){
+  $('streamPanel').style.display='';
+  $('streamSpinner').className='spinner active';
+  $('streamBody').className='stream-body empty';
+  $('streamBody').textContent='等待 AI 输出...';
+  _streamBuf='';_streamActive=true;$('streamLen').textContent='0 字符';
+  scrollSV(true);
+}
+var _streamTimer=null;
+function appendStream(t){
+  if(!_streamActive||!t)return;
+  _streamBuf+=t;
+  if(!_streamTimer){
+    _streamTimer=setTimeout(function(){
+      _streamTimer=null;
+      $('streamBody').className='stream-body';
+      var display=_streamBuf.length>3000?_streamBuf.slice(-3000):_streamBuf;
+      $('streamBody').textContent=display;
+      $('streamLen').textContent=_streamBuf.length+' 字符';
+      $('streamBody').scrollTop=$('streamBody').scrollHeight;
+      scrollSV();
+    },150);
+  }
+}
+function finishStream(msg){
+  _streamActive=false;
+  $('streamSpinner').className='spinner';
+  if(msg){$('streamBody').className='stream-body';$('streamBody').innerHTML=e2(msg)}
+}
+function forcePhase(p){phase=p;_sessionActive=true;uPhase()}
+
+function isNearBot(v){return v.scrollHeight-v.scrollTop-v.clientHeight<200}
+function scrollSV(force){
+  if(_scrollRaf)return;
+  _scrollRaf=setTimeout(function(){
+    _scrollRaf=null;
+    var v=getAV();
+    if(v&&(force||isNearBot(v)))v.scrollTop=v.scrollHeight;
+  },50);
+}
+function getAV(){
+  if(phase==='requirements')return $('vReq');
+  if(phase==='planning')return $('vPlan');
+  if(phase==='review')return $('vReview');
+  return $('vCode');
+}
+function updateLines(ev){
+  if(ev.coder==='html'){_htmlL=ev.line_count||0;$('mHtml').textContent=_htmlL+' 行'}
+  else{_pyL=ev.line_count||0;$('mPy').textContent=_pyL+' 行'}
+}
+function coderDone(ev){
+  var isH=ev.coder==='html';
+  if(isH){_htmlL=ev.lines||0;$('mHtml').textContent=_htmlL+' 行';$('mHtml').className='sb-vl ok'}
+  else{_pyL=ev.lines||0;$('mPy').textContent=_pyL+' 行';$('mPy').className='sb-vl ok'}
+  aSys('✓ '+(ev.coder||'')+' 完成 ('+ev.lines+' lines)','success');
+  if(ev.preview){_pd[isH?'html':'python']=ev.preview;_pf=isH?'html':'python';syncCPTab();renderCP();if(isH)refreshLive()}
+  else fetchPreview();
+}
+function updateCodeState(ev){
+  if(ev.python_preview){_pd.python=ev.python_preview;_pyL=ev.python_lines||ev.python_preview.length}
+  if(ev.html_preview){_pd.html=ev.html_preview;_htmlL=ev.html_preview.length}
+  if(ev.python_lines){_pyL=ev.python_lines;$('mPy').textContent=_pyL+' 行'}
+  if(ev.html_lines){_htmlL=ev.html_lines;$('mHtml').textContent=_htmlL+' 行'}
+  renderCP();
+}
+function showV(id){document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});var el=$(id);if(el)el.classList.add('active')}
+function showAct(id){
+  if(_mode!=='pipeline')return; // Bug 4 fix: only show action bars in Build/pipeline mode
+  ['actReq','actPlan','actCode','actReview'].forEach(function(a){$(a).classList.add('hidden')});
+  var m={req:'actReq',plan:'actPlan',code:'actCode',review:'actReview'};
+  if(m[id])$(m[id]).classList.remove('hidden');
+  var ti=$('ti');
+  ti.placeholder=id==='req'?'继续与 PM 对话...':id==='code'?'额外编码要求...':'输入指令...';
+}
+function uPhase(){
+  $('dot').className='dot '+phase;
+  var lb={idle:'空闲',requirements:'需求讨论',planning:'项目规划',coding:'代码编写',review:'审查阶段'};
+  $('ph').textContent=lb[phase]||phase;$('mPh').textContent=lb[phase]||phase;
+  if(phase==='requirements'){showV('vReq');showAct('req')}
+  else if(phase==='planning'){showV('vPlan');showAct('plan')}
+  else if(phase==='coding'){showV('vCode');showAct('code')}
+  else if(phase==='review'){showV('vReview');showAct('review')}
+  else{showV('vReq');showAct('req')}
+  scrollSV(true);
+}
+function toggleCP(){$('cpBody').classList.toggle('collapsed');$('cpTog').classList.toggle('collapsed')}
+function switchCP(el){document.querySelectorAll('.cp-tab').forEach(function(t){t.classList.remove('active')});el.classList.add('active');_pf=el.dataset.file;renderCP()}
+function syncCPTab(){document.querySelectorAll('.cp-tab').forEach(function(t){t.classList.toggle('active',t.dataset.file===_pf)})}
+function renderCP(){
+  var lines=_pd[_pf]||[];var body=$('cpBody');if(!body)return;
+  if(!lines.length){body.innerHTML='<div class="cp-empty">暂无代码</div>';$('cpCount').textContent='0 行';return}
+  var h='';for(var i=0;i<lines.length;i++)h+='<div class="cp-line"><span class="cp-ln">'+(i+1)+'</span><span class="cp-code">'+e2(lines[i])+'</span></div>';
+  body.innerHTML=h;$('cpCount').textContent=lines.length+' 行';
+}
+function refreshLive(){var html=(_pd.html||[]).join('\n');if(!html)return;var f=$('liveFrame');if(f)f.srcdoc=html}
+function fetchPreview(){fetch(A+'/api/file').then(function(r){return r.json()}).then(function(d){if(d.python){_pd.python=d.python.split('\n');_pyL=_pd.python.length;$('mPy').textContent=_pyL+' 行'}if(d.html){_pd.html=d.html.split('\n');_htmlL=_pd.html.length;$('mHtml').textContent=_htmlL+' 行';refreshLive()}renderCP()}).catch(function(){})}
+function switchRP(el){document.querySelectorAll('.rp-tab').forEach(function(t){t.classList.remove('active')});el.classList.add('active');renderRP(el.dataset.file)}
+function renderRP(file){
+  var lines=_pd[file]||[];var body=$('rpBody');if(!body)return;
+  if(!lines.length){body.innerHTML='<div class="cp-empty">暂无代码</div>';$('rpCount').textContent='0 行';$('rpFile').textContent=file==='html'?'index.html':'main.py';return}
+  var h='';for(var i=0;i<lines.length;i++)h+='<div class="cp-line"><span class="cp-ln">'+(i+1)+'</span><span class="cp-code">'+e2(lines[i])+'</span></div>';
+  body.innerHTML=h;$('rpCount').textContent=lines.length+' 行';$('rpFile').textContent=file==='html'?'index.html':'main.py';
+}
+function loadReview(){
+  fetch(A+'/api/file').then(function(r){return r.json()}).then(function(d){
+    if(d.python){_pd.python=d.python.split('\n');_pyL=_pd.python.length;$('mPy').textContent=_pyL+' 行'}
+    if(d.html){_pd.html=d.html.split('\n');_htmlL=_pd.html.length;$('mHtml').textContent=_htmlL+' 行'}
+    $('rpTabH').style.display=_needsHtml?'':'none';
+    var f=_needsPy?'python':(_needsHtml?'html':'python');
+    document.querySelectorAll('.rp-tab').forEach(function(t){t.classList.toggle('active',t.dataset.file===f)});
+    renderRP(f);syncCPTab();renderCP();if(_needsHtml)refreshLive();
+  }).catch(function(){});
+}
+function renderRF(){
+  var panel=$('rfPanel');if(!panel)return;
+  if(!_reviewFindings.length){panel.style.display='none';return}
+  panel.style.display='block';
+  var errs=_reviewFindings.filter(function(f){return f.severity==='error'}).length;
+  $('rfCount').textContent=errs+' 错误, '+(_reviewFindings.length-errs)+' 警告';
+  var h='';
+  _reviewFindings.forEach(function(f){
+    var sc=f.status==='applied'?' applied':f.status==='rejected'?' rejected':'';
+    h+='<div class="rf-finding'+sc+'" id="rf-'+f.id+'"><div class="rf-fh"><span class="rf-sev '+f.severity+'">'+f.severity+'</span><span class="rf-lines">L'+f.start_line+(f.end_line!==f.start_line?'-'+f.end_line:'')+'</span><span class="rf-title">'+e2(f.title)+'</span></div>';
+    if(f.description)h+='<div class="rf-desc">'+e2(f.description)+'</div>';
+    if(f.fix_edit&&f.status==='pending')h+='<div class="rf-fix">'+e2(f.fix_edit.substring(0,200))+'</div>';
+    h+='<div class="rf-fa">';
+    if(f.status==='pending'){h+='<button class="tb sm pri" onclick="acceptRF('+f.id+')">✓ 接受</button><button class="tb sm" onclick="rejectRF('+f.id+')">✗ 跳过</button>'}
+    else{h+='<span class="rf-status '+f.status+'">'+(f.status==='applied'?'已应用':'已跳过')+'</span>'}
+    h+='</div></div>';
+  });
+  $('rfBody').innerHTML=h;
+}
+function markRF(id,status){_reviewFindings.forEach(function(f){if(f.id===id)f.status=status});renderRF()}
+function acceptRF(id){fetch(A+'/api/review/accept',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id})}).catch(function(e){aSys('✗ '+e,'error')})}
+function rejectRF(id){fetch(A+'/api/review/reject',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id})}).catch(function(e){aSys('✗ '+e,'error')})}
+function acceptAllRF(){fetch(A+'/api/review/accept_all',{method:'POST'}).catch(function(e){aSys('✗ '+e,'error')})}
+function rejectAllRF(){fetch(A+'/api/review/skip_all',{method:'POST'}).catch(function(e){aSys('✗ '+e,'error')})}
+function proceedReview(){fetch(A+'/api/review/proceed',{method:'POST'}).catch(function(e){aSys('✗ '+e,'error')})}
+function showReviewWait(){showV('vCode');showAct('code');$('rfPanel').style.display='block';aSys('AI 审查发现问题，请处理或点击"继续"','warn')}
+function aChat(role,text,scroll){
+  if(scroll===undefined)scroll=true;
+  var v=$('vReq');var d=document.createElement('div');d.className='msg '+role;
+  var ct=e2(cleanAI(text)).replace(/\n/g,'<br>');
+  d.innerHTML=(role==='pm'?'<div class="sender">PM 项目经理</div>':'')+'<div class="msg-c">'+ct+'</div>';
+  v.appendChild(d);if(scroll)scrollSV(true);
+}
+function aThink(){rmThink();_tb='';var v=getAV();var d=document.createElement('div');d.className='think';d.id='th';d.textContent='思考中...';v.appendChild(d);scrollSV(true)}
+function uThink(t){
+  var el=$('th');if(!el)return;
+  _tb+=t;
+  if(_thinkTimer)return;
+  _thinkTimer=setTimeout(function(){
+    _thinkTimer=null;
+    var th=$('th');if(!th)return;
+    var txt=_tb.slice(-300);
+    th.textContent=txt.length>300?'...'+txt:txt;
+    th.parentElement.scrollTop=th.parentElement.scrollHeight;
+  },120);
+}
+function rmThink(){var el=$('th');if(el)el.remove();if(_thinkTimer){clearTimeout(_thinkTimer);_thinkTimer=null}}
+function aSys(t,c){var v;if(phase==='review')v=$('vReview');else v=getAV();if(!v)return;var d=document.createElement('div');d.className='sys '+(c||'dim');d.innerHTML='<span class="ts">'+ts2()+'</span> '+e2(t);v.appendChild(d);scrollSV()}
+function aSk(s){var el=$('sbSk');if(el.querySelector('[data-f="'+s.file+'"]'))return;var d=document.createElement('div');d.dataset.f=s.file;d.innerHTML='<span class="skill-pill">'+e2(s.title||s.file)+'</span>';el.appendChild(d)}
+function uB(b){var p=b.pct||0;$('mb').textContent=p+'%';var f=$('mf');f.style.width=Math.min(p,100)+'%';f.className='meter-f'+(p>=80?' danger':p>=60?' warn':'');$('mbd').textContent=(b.total||0).toLocaleString()+' / '+(b.limit||0).toLocaleString()}
+function aDiffH(coder,a,d,m){var v=$('codeStream');if(!v)return;var el=document.createElement('div');el.className='diff-hdr';el.textContent='━━━ '+(coder||'')+' DIFF: '+a+'+, '+d+'-, '+m+'~ ━━━';v.appendChild(el);scrollSV()}
+function aDf(tp,ev){
+  var v=$('codeStream');if(!v)return;
+  var el=document.createElement('div');el.className='diff-line '+tp;
+  if(tp==='da')el.innerHTML='<span class="diff-mk">+</span><span class="diff-r">'+ev.row+'</span><span class="diff-c">'+e2(ev.content)+'</span>';
+  else if(tp==='dd')el.innerHTML='<span class="diff-mk">−</span><span class="diff-r">'+ev.row+'</span><span class="diff-c">'+e2(ev.content)+'</span>';
+  else if(tp==='dm-o')el.innerHTML='<span class="diff-mk">~</span><span class="diff-r">'+ev.old_row+'</span><span class="diff-c">'+e2(ev.old_content)+'</span>';
+  else if(tp==='dm-n')el.innerHTML='<span class="diff-mk">~</span><span class="diff-r">'+ev.new_row+'</span><span class="diff-c">'+e2(ev.new_content)+'</span>';
+  v.appendChild(el);scrollSV();
+}
+function showPlan(s,r){
+  var v=$('vPlan');v.innerHTML='';var c=document.createElement('div');c.className='plan-card';
+  var h='<h3>项目结构</h3>';
+  if(s.project_name)h+='<div class="plan-row"><span class="plan-lb">名称</span><span class="plan-vl">'+e2(s.project_name)+'</span></div>';
+  if(s.description)h+='<div class="plan-row"><span class="plan-lb">描述</span><span class="plan-vl">'+e2(s.description)+'</span></div>';
+  h+='<div class="plan-row"><span class="plan-lb">Python</span><span class="plan-vl" style="color:'+(s.needs_python!==false?'var(--green)':'var(--text-tertiary)')+'">'+(s.needs_python!==false?'需要':'不需要')+'</span></div>';
+  h+='<div class="plan-row"><span class="plan-lb">HTML</span><span class="plan-vl" style="color:'+(s.needs_html?'var(--green)':'var(--text-tertiary)')+'">'+(s.needs_html?'需要':'不需要')+'</span></div>';
+  if(s.files)for(var f in s.files){var d=s.files[f];h+='<div class="fcard"><div class="nm">'+e2(f)+'</div><div class="ds">'+e2(d.description||'')+'</div></div>'}
+  if(s.dependencies&&s.dependencies.length)h+='<div class="plan-row"><span class="plan-lb">依赖</span><span class="plan-vl" style="color:var(--accent)">'+s.dependencies.join(', ')+'</span></div>';
+  if(s.notes)h+='<div style="color:var(--text-tertiary);font-size:.78rem;margin-top:12px;padding:12px;background:var(--surface-hover);border-radius:var(--r-sm)">'+e2(s.notes)+'</div>';
+  c.innerHTML=h;v.appendChild(c);$('mPlan').textContent='✓';$('mPlan').className='sb-vl ok';scrollSV(true);
+}
+function uStr(s){$('mPlan').textContent=s.project_name?'✓':'有';$('mPlan').className='sb-vl ok'}
+function sendPmMsg(){
+  var inp=$('pmInput');
+  if(!inp)return;
+  var m=inp.value.trim();
+  if(!m)return;
+  inp.value='';
+  if(!_pmActiveProject){
+    aSys('正在创建项目...','info');
+    fetch(A+'/api/pm/projects/new',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:m.slice(0,20)||'新项目'})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(d.project){
+        pmActivateProject(d.project.id).then(function(){
+          inp.value=m;sendPmMsg();
+        });
+      }
+    }).catch(function(e){aSys('创建项目失败: '+e,'error')});
+    return;
+  }
+  _pmChatMsgs.push({role:'user',content:m});
+  pmTerminalLog('response','> '+m);
+  var chatArea=$('pmChatArea');
+  if(chatArea){chatArea.style.display='flex';chatArea.style.flexDirection='column';chatArea.style.height='calc(100vh - 120px)'}
+  pmStreamStart();
+  var modelEl=$('mainModelSelect');
+  var model=modelEl?modelEl.value:'';
+  var body={message:m};
+  if(model)body.model=model;
+  var ac=new AbortController();var acTimer=setTimeout(function(){ac.abort()},180000);
+  fetch(A+'/api/pm/projects/'+_pmActiveProject.id+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ac.signal})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    clearTimeout(acTimer);
+    if(!_pmStreamDone){pmStreamEnd();if(d.message)pmTerminalLog('response',d.message);else if(d.error)pmTerminalLog('error',d.error);}
+  })
+  .catch(function(e){clearTimeout(acTimer);if(e.name==='AbortError'){pmStreamEnd();pmTerminalLog('error','请求超时，请重试')}else{pmTerminalLog('error','错误: '+e);pmStreamEnd()}});
+}
+function sendMsg(){
+  if(_mode==='pm_agent'){sendPmMsg();return}
+  var ti=$('ti');
+  var m=ti.value.trim();
+  if(!m)return;
+  ti.value='';
+  aChat('user',m);
+  var ac=new AbortController();var acTimer=setTimeout(function(){ac.abort()},180000);
+  fetch(A+'/api/pm/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:m}),signal:ac.signal}).then(function(){clearTimeout(acTimer)}).catch(function(e){clearTimeout(acTimer);if(e.name!=='AbortError')aSys('✗ '+e,'error')})}
+function focusIn(){$('ti').focus()}
+function pmApprove(){aSys('生成需求文档...','info');fetch(A+'/api/pm/approve',{method:'POST'}).catch(function(e){aSys('✗ '+e,'error')})}
+function dirPlan(){fetch(A+'/api/director/plan',{method:'POST'})}
+function startCode(){
+  showV('vCode');showAct('code');$('codeStream').innerHTML='';
+  $('rfPanel').style.display='none';_reviewFindings=[];
+  $('streamPanel').style.display='none';_streamBuf='';_streamActive=false;
+  var ex=$('ti').value.trim();$('ti').value='';
+  var autoR=$('cbAutoReview')?$('cbAutoReview').checked:false;
+  fetch(A+'/api/coder/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({extra:ex,auto_review:autoR})});
+}
+function goReview(){showV('vReview');showAct('review');loadReview();aSys('可从错误中生成 Skill','info')}
+function genSkill(){
+  var errs=Array.from(document.querySelectorAll('.sys.error')).map(function(e){return e.textContent}).join('\n');
+  if(!errs){aSys('没有错误信息','warn');return}
+  aSys('正在生成 Skill...','info');
+  showStream();
+  fetch(A+'/api/skill/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({error:errs.slice(0,1000)})})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    finishStream('Skill 生成完成');
+    aSys('✓ Skill 生成成功','success');
+    loadSkills();scrollSV(true);
+  })
+  .catch(function(e){finishStream('Skill 生成失败');aSys('✗ '+e,'error');scrollSV(true)});
+}
+function doReset(){fetch(A+'/api/reset',{method:'POST'}).catch(function(){});resetUI()}
+function resetUI(){
+  phase='idle';isThinking=false;_tb='';_pyL=0;_htmlL=0;_pf='python';_pd={python:[],html:[]};_needsPy=true;_needsHtml=false;_reviewFindings=[];
+  _streamBuf='';_streamActive=false;_sessionActive=false;_snapshotMsgIdx=0;
+  if(_thinkTimer){clearTimeout(_thinkTimer);_thinkTimer=null}
+  if(_scrollRaf){cancelAnimationFrame(_scrollRaf);_scrollRaf=null}
+  ['vReq','vPlan','codeStream'].forEach(function(id){var el=$(id);if(el)el.innerHTML=''});
+  $('rpBody').innerHTML='<div class="cp-empty">加载中...</div>';
+  $('cpBody').innerHTML='<div class="cp-empty">等待编码...</div>';
+  $('sbSk').innerHTML='';$('htmlLive').style.display='none';$('cpTabH').style.display='none';$('rpTabH').style.display='none';
+  $('rfPanel').style.display='none';$('streamPanel').style.display='none';
+  $('mReq').textContent='无';$('mReq').className='sb-vl no';
+  $('mPlan').textContent='无';$('mPlan').className='sb-vl no';
+  $('mPy').textContent='—';$('mPy').className='sb-vl no';
+  $('mHtml').textContent='—';$('mHtml').className='sb-vl no';
+  $('mReview').textContent='—';$('mReview').className='sb-vl no';
+  $('cpCount').textContent='0 行';
+  uPhase();aSys('已重置','dim');
+}
+// ═══════════════ Build Mode — Conversation Save/Restore ═══════════════
+function saveConversation(){
+  var snap={
+    phase:phase,conversation:[],requirements:$('mReq').textContent!=='无'?'✓':'',
+    structure:{},code:{python:_pd.python,html:_pd.html},
+    pyLines:_pyL,htmlLines:_htmlL,needsPy:_needsPy,needsHtml:_needsHtml,
+    reviewFindings:_reviewFindings,ts:Date.now()
+  };
+  // Save to server
+  fetch(A+'/api/snapshots/save',{method:'POST'}).then(function(r){return r.json()}).then(function(d){
+    aSys('✓ 对话已保存','success');
+  }).catch(function(e){aSys('保存失败: '+e,'error')});
+}
+function restoreConversation(){
+  fetch(A+'/api/snapshots').then(function(r){return r.json()}).then(function(d){
+    var snaps=d.snapshots||[];
+    if(!snaps.length){aSys('无可用快照','warn');return}
+    var latest=snaps[snaps.length-1];
+    restoreFromSnapshot(latest.id);
+  }).catch(function(e){aSys('加载失败: '+e,'error')});
+}
+function restoreFromSnapshot(sid){
+  fetch(A+'/api/snapshots/'+sid+'/restore',{method:'POST'}).then(function(r){return r.json()}).then(function(d){
+    if(d.snapshot){
+      var s=d.snapshot;
+      aSys('✓ 快照已恢复','success');
+      // Reload state from server
+      fetch(A+'/api/state').then(function(r){return r.json()}).then(function(st){
+        if(st.requirements)$('mReq').textContent='✓',$('mReq').className='sb-vl ok';
+        if(st.structure&&Object.keys(st.structure).length){uStr(st.structure)}
+      });
+      fetchPreview();
+      scrollSV(true);
+    }
+  }).catch(function(e){aSys('恢复失败: '+e,'error')});
+}
+function listSnapshots(){
+  fetch(A+'/api/snapshots').then(function(r){return r.json()}).then(function(d){
+    var snaps=d.snapshots||[];
+    if(!snaps.length){aSys('无可用快照','warn');return}
+    var h='<div style="max-height:300px;overflow-y:auto">';
+    snaps.slice(-10).reverse().forEach(function(s){
+      var t=new Date(s.timestamp*1000).toLocaleString('zh-CN');
+      h+='<div class="fcard" style="cursor:pointer;margin-bottom:6px" onclick="restoreFromSnapshot(\''+s.id+'\')">';
+      h+='<div class="nm">'+e2(t)+'</div>';
+      h+='<div class="ds">阶段: '+(s.phase||'unknown')+'</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+    $('snapListBody').innerHTML=h;
+    openDr('snapList');
+  }).catch(function(e){aSys('加载失败: '+e,'error')});
+}
+
+// ═══════════════ Build Mode — Local File Manager ═══════════════
+var _workspaceFiles=[],_archiveFiles=[];
+function loadFileList(){
+  fetch(A+'/api/files/list').then(function(r){return r.json()}).then(function(d){
+    _workspaceFiles=d.files||[];
+    renderFileList();
+  }).catch(function(){});
+}
+function renderFileList(){
+  var el=$('fileListBody');if(!el)return;
+  if(!_workspaceFiles.length){el.innerHTML='<div style="color:var(--text-tertiary);text-align:center;padding:16px">暂无文件</div>';return}
+  el.innerHTML=_workspaceFiles.map(function(f){
+    var name=typeof f==='string'?f:(f.name||f);
+    var active=(_pd.python&&name.endsWith('.py'))||(_pd.html&&name.endsWith('.html'));
+    return '<div class="fcard" style="display:flex;align-items:center;gap:8px;margin-bottom:4px;cursor:pointer;'+(active?'border-color:var(--accent);':'')+'" onclick="openFile(\''+e2(name)+'\')">'
+      +'<span class="nm" style="flex:1">'+e2(name)+'</span>'
+      +'<span style="font-size:.6rem;color:var(--text-tertiary)">'+(name.endsWith('.py')?'Python':name.endsWith('.html')?'HTML':'Text')+'</span>'
+      +'<button class="tb sm" onclick="event.stopPropagation();archiveFile(\''+e2(name)+'\')" title="归档到备份文件夹">📦</button>'
+      +'</div>';
+  }).join('');
+}
+function openFile(name){
+  fetch(A+'/api/files/read?name='+encodeURIComponent(name)).then(function(r){return r.json()}).then(function(d){
+    if(d.content){
+      if(name.endsWith('.py')){_pd.python=d.content.split('\n');_pyL=d.content.split('\n').length;_pf='python';$('mPy').textContent=_pyL+' 行'}
+      else if(name.endsWith('.html')){_pd.html=d.content.split('\n');_htmlL=d.content.split('\n').length;_pf='html';$('mHtml').textContent=_htmlL+' 行'}
+      renderCP();syncCPTab();aSys('已打开: '+name,'system');
+      if(name.endsWith('.html'))refreshLive();
+    }
+  }).catch(function(e){aSys('打开失败: '+e,'error')});
+}
+function archiveFile(name){
+  fetch(A+'/api/files/read?name='+encodeURIComponent(name)).then(function(r){return r.json()}).then(function(d){
+    if(d.content){
+      // Save to archive folder
+      fetch(A+'/api/files/write',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'../archive/'+name,content:d.content})})
+      .then(function(){return fetch(A+'/api/files/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name})})})
+      .then(function(){aSys('已归档: '+name,'success');loadFileList()})
+      .catch(function(e){aSys('归档失败: '+e,'error')});
+    }
+  });
+}
+
+function openDr(n){
+  document.getElementById('dbg').classList.add('open');
+  if(n==='plugins'){document.getElementById('plDr').classList.add('open');refreshPlugins()}
+  else if(n==='skills'){document.getElementById('skDr').classList.add('open');loadSkills()}
+  else if(n==='settings'){document.getElementById('setDr').classList.add('open');loadSettings()}
+  else if(n==='searchDr'){document.getElementById('searchDr').classList.add('open')}
+  else if(n==='snapList'){document.getElementById('snapDr').classList.add('open')}
+  else if(n==='files'){document.getElementById('filesDr').classList.add('open');loadFileList()}
+  else if(n==='wsArchives'){document.getElementById('wsArchDr').classList.add('open');loadWsInfo();loadWsArchives()}
+}
+function closeDrs(){document.getElementById('dbg').classList.remove('open');document.getElementById('setDr').classList.remove('open');document.getElementById('skDr').classList.remove('open');document.getElementById('plDr').classList.remove('open');document.getElementById('searchDr').classList.remove('open');document.getElementById('snapDr').classList.remove('open');document.getElementById('filesDr').classList.remove('open');document.getElementById('wsArchDr').classList.remove('open')}
+function sTab(el,n){el.parentElement.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});el.classList.add('active');document.querySelectorAll('.tc').forEach(function(t){t.classList.remove('active')});$('tc-'+n).classList.add('active')}
+function loadSettings(){fetch(A+'/api/state').then(function(r){return r.json()}).then(function(d){agentCfg=d.agents||{};provCfg=d.providers||{};renderProv();renderAg();renderStyle()}).catch(function(){})}
+function renderProv(){
+  var el=$('tc-providers');var h='';
+  for(var k in provCfg){
+    var v=provCfg[k];
+    h+='<div class="ac" id="pv-'+k+'"><h4>'+e2(v.name||k)+' <span class="badge '+(v.has_key?'on':'off')+'">'+(v.has_key?'密钥 ✓':'无密钥')+'</span></h4>';
+    h+='<div class="fld"><label>接口地址</label><input id="pu-'+k+'" value="'+e2(v.base_url||'')+'"></div>';
+    h+='<div class="fld"><label>API Key</label><div class="pw"><input id="pk-'+k+'" type="password" placeholder="'+(v.has_key?'●●●●●● (留空保持不变)':'输入 API Key...')+'"><button class="pw-t" onclick="togglePw(\'pk-'+k+'\')">👁</button></div><div class="mt2"><span class="kb '+(v.has_key?'ok':'no')+'">'+(v.has_key?'已设置':'未设置')+'</span></div></div>';
+    h+='<div class="fld"><label>默认模型</label><input id="pm-'+k+'" value="'+e2(v.default_model||'')+'" list="dlm-'+k+'"><datalist id="dlm-'+k+'">';
+    (v.models||[]).forEach(function(m){h+='<option value="'+m+'">'});
+    h+='</datalist></div><div class="flex gap8"><button class="tbtn2" onclick="testPv(\''+k+'\',this)">测试连接</button><div class="tr" id="tr-'+k+'"></div></div></div>';
+  }
+  el.innerHTML=h;
+}
+function renderAg(){
+  var el=$('tc-agents');var h='';
+  for(var k in agentCfg){
+    var v=agentCfg[k];
+    h+='<div class="ac"><h4><span>'+e2(v.name||k)+'</span><div class="tog '+(v.enabled?'on':'')+'" id="ae-'+k+'" onclick="this.classList.toggle(\'on\')"></div></h4>';
+    h+='<div class="fld"><label>服务商</label><select id="ap-'+k+'">';
+    for(var pk in provCfg)h+='<option value="'+pk+'" '+(pk===v.provider?'selected':'')+'>'+e2(provCfg[pk].name)+'</option>';
+    h+='</select></div>';
+    h+='<div class="fld"><label>模型</label><input id="am-'+k+'" value="'+e2(v.model||'')+'" list="adl-'+k+'"><datalist id="adl-'+k+'">';
+    (provCfg[v.provider]&&provCfg[v.provider].models||[]).forEach(function(m){h+='<option value="'+m+'">'});
+    h+='</datalist></div>';
+    h+='<div class="fld"><label>Token 限制</label><input id="at-'+k+'" type="number" value="'+(v.token_limit||4096)+'"></div>';
+    h+='<div class="fld"><label>系统提示词</label><textarea id="as-'+k+'">'+e2(v.system_prompt||'')+'</textarea></div></div>';
+  }
+  el.innerHTML=h;
+}
+function renderStyle(){
+  var el=$('tc-style');if(!el)return;
+  var h='<div class="ac"><h4>HTML 编码风格设置</h4>';
+  h+='<div class="fld"><label>选择技能风格</label>';
+  h+='<select id="hs-skill" onchange="onStyleSkillChange()"><option value="">-- 不指定风格 --</option>';
+  fetch(A+'/api/skills').then(function(r){return r.json()}).then(function(d){
+    var skills=d.skills||[];
+    var sel=$('hs-skill');
+    skills.forEach(function(s){
+      var opt=document.createElement('option');
+      opt.value=s.file;opt.textContent=s.title||s.file;
+      sel.appendChild(opt);
+    });
+    fetch(A+'/api/html-style').then(function(r){return r.json()}).then(function(d){
+      if(sel)sel.value=d.skill_file||'';
+      if($('hs-prompt'))$('hs-prompt').value=d.custom_prompt||'';
+    });
+  });
+  h+='</select></div>';
+  h+='<div class="fld"><label>自定义提示词（追加到 HTML 编程师 system prompt）</label><textarea id="hs-prompt" placeholder="例如：使用暗色主题、GSAP动画、响应式布局..." style="min-height:100px"></textarea></div>';
+  h+='</div>';
+  el.innerHTML=h;
+}
+function onStyleSkillChange(){
+  var sel=$('hs-skill');if(!sel)return;
+  var fn=sel.value;
+  if(!fn){$('hs-prompt').value='';return;}
+  fetch(A+'/api/skills/'+encodeURIComponent(fn)).then(function(r){return r.json()}).then(function(d){
+    if(d.content){$('hs-prompt').value='参考技能文档 '+fn+' 的风格规范进行编码';}
+  });
+}
+function togglePw(id){var el=$(id);if(el)el.type=el.type==='password'?'text':'password'}
+function testPv(name,btn){
+  var r=$('tr-'+name);btn.disabled=true;btn.textContent='测试中...';r.className='tr';
+  fetch(A+'/api/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({provider:name})})
+  .then(function(res){return res.json()})
+  .then(function(d){
+    if(d.status==='ok'){r.className='tr ok';r.textContent='连接成功\nResponse: "'+d.response+'"';var b=document.querySelector('#pv-'+name+' .badge');if(b){b.className='badge on';b.textContent='Key ✓'}}
+    else{r.className='tr err';r.textContent=d.error||'连接失败'}
+  })
+  .catch(function(e){r.className='tr err';r.textContent=String(e)})
+  .then(function(){btn.disabled=false;btn.textContent='测试连接'});
+}
+function saveAll(){
+  var k,body,key;
+  var promises=[];
+  for(k in provCfg){
+    body={name:k,base_url:($('pu-'+k)||{}).value||'',default_model:($('pm-'+k)||{}).value||''};
+    key=($('pk-'+k)||{}).value||'';
+    if(key.trim())body.api_key=key.trim();
+    promises.push(fetch(A+'/api/config/provider',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).catch(function(){}));
+  }
+  for(k in agentCfg){
+    body={name:k,enabled:($('ae-'+k)&&$('ae-'+k).classList&&$('ae-'+k).classList.contains('on')),provider:($('ap-'+k)||{}).value||'',model:($('am-'+k)||{}).value||'',token_limit:parseInt(($('at-'+k)||{}).value)||4096,system_prompt:($('as-'+k)||{}).value||''};
+    promises.push(fetch(A+'/api/config/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).catch(function(){}));
+  }
+  var hsBody={skill_file:($('hs-skill')||{}).value||'',custom_prompt:($('hs-prompt')||{}).value||''};
+  promises.push(fetch(A+'/api/html-style',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(hsBody)}).catch(function(){}));
+  Promise.all(promises).then(function(){closeDrs();aSys('配置已保存','system')});
+}
+function loadSkills(){fetch(A+'/api/skills').then(function(r){return r.json()}).then(function(d){renderSk(d.skills||[])}).catch(function(){})}
+function renderSk(list){
+  var el=$('skBody');
+  if(!list.length){el.innerHTML='<div style="color:var(--text-tertiary);font-size:.82rem;padding:24px 0">暂无 Skill 文件</div>';return}
+  var pending=list.filter(function(s){return s.status==='pending'});
+  var approved=list.filter(function(s){return s.status!=='pending'});
+  var h='';
+  if(pending.length){
+    h+='<div style="margin-bottom:16px"><div style="font-size:.62rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">⏳ 待审核 ('+pending.length+')</div>';
+    pending.forEach(function(s){
+      h+='<div class="ac" style="padding:10px 14px;border-left:3px solid var(--accent);margin-bottom:6px"><div class="flex items-c" style="gap:8px"><span style="flex:1;font-size:.78rem;font-weight:500">'+e2(s.title||s.file)+'</span><button class="tb sm pri" onclick="approveSkill(\''+e2(s.file)+'\')" style="font-size:.62rem">✓ 通过</button><button class="tb sm" onclick="rejectSkill(\''+e2(s.file)+'\')" style="font-size:.62rem;color:var(--red)">✗ 驳回</button></div></div>';
+    });
+    h+='</div>';
+  }
+  if(approved.length){
+    if(pending.length)h+='<div style="font-size:.62rem;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">✅ 已生效 ('+approved.length+')</div>';
+    approved.forEach(function(s){
+      h+='<div class="ac" style="padding:10px 14px"><div class="flex items-c"><span style="flex:1;font-size:.78rem;font-weight:500">'+e2(s.title||s.file)+'</span><span style="color:var(--text-tertiary);font-family:var(--mono);font-size:.58rem">'+(s.keywords||[]).slice(0,5).join(', ')+'</span><button class="tb sm" onclick="editSk(\''+e2(s.file)+'\')">编辑</button></div></div>';
+    });
+  }
+  el.innerHTML=h;
+}
+function editSk(fn){closeDrs();$('skMod').classList.add('open');fetch(A+'/api/skills/'+encodeURIComponent(fn)).then(function(r){return r.json()}).then(function(d){$('skFn').value=d.filename||fn;$('skCt').value=d.content||''}).catch(function(){})}
+function approveSkill(fn){fetch(A+'/api/skills/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:fn})}).then(function(){loadSkills();aSys('✓ 技能已通过','success')}).catch(function(e){aSys('失败: '+e,'error')})}
+function rejectSkill(fn){fetch(A+'/api/skills/reject',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:fn})}).then(function(){loadSkills();aSys('✗ 技能已驳回','dim')}).catch(function(e){aSys('失败: '+e,'error')})}
+function newSkill(){closeDrs();$('skMod').classList.add('open');$('skFn').value='skill_new.md';$('skCt').value='---\nkeywords: \ntitle: \n---\n\n'}
+function closeSkMod(){$('skMod').classList.remove('open')}
+function saveSkill(){var fn=$('skFn').value.trim();var ct=$('skCt').value;if(!fn)return;fetch(A+'/api/skills',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:fn,content:ct})}).then(function(){closeSkMod();loadSkills()}).catch(function(){})}
+function exportSettings(){
+  fetch(A+'/api/config/export').then(function(r){return r.json()}).then(function(d){
+    var blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download='script-weaver-settings.json';a.click();
+    URL.revokeObjectURL(url);aSys('✓ 配置已导出','success');
+  }).catch(function(e){aSys('导出失败: '+e,'error')});
+}
+function importSettings(){
+  var input=document.createElement('input');input.type='file';input.accept='.json';
+  input.onchange=function(){
+    var file=input.files[0];if(!file)return;
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var data=JSON.parse(e.target.result);
+        fetch(A+'/api/config/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+        .then(function(r){return r.json()}).then(function(d){
+          aSys('✓ 导入完成: '+d.agents+' 个智能体, '+d.skills+' 个技能','success');
+          loadSettings();loadSkills();
+        }).catch(function(e){aSys('导入失败: '+e,'error')});
+      }catch(e){aSys('JSON 解析失败: '+e,'error')}
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+// ═══════════════ Web Search ═══════════════
+function doWebSearch(){
+  var q=$('searchInput').value.trim();
+  if(!q)return;
+  $('searchResults').innerHTML='<div style="text-align:center;padding:20px;color:var(--text-tertiary)"><div class="spinner active" style="margin:0 auto 10px"></div>搜索中...</div>';
+  fetch(A+'/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    var results=d.results||[];
+    if(!results.length){$('searchResults').innerHTML='<div style="text-align:center;padding:20px;color:var(--text-tertiary)">无结果</div>';return}
+    var h='';
+    results.forEach(function(r){
+      h+='<div class="search-result">';
+      h+='<h4>'+e2(r.title||'')+'</h4>';
+      if(r.snippet)h+='<p>'+e2(r.snippet)+'</p>';
+      if(r.url)h+='<div class="url">'+e2(r.url)+'</div>';
+      h+='</div>';
+    });
+    $('searchResults').innerHTML=h;
+  })
+  .catch(function(e){$('searchResults').innerHTML='<div style="text-align:center;padding:20px;color:var(--red)">搜索失败: '+e2(String(e))+'</div>'});
+}
+
+// ═══════════════ PM Agent Functions ═══════════════
+var _pmProjects=[],_pmActiveProject=null,_pmChatMsgs=[];
+
+async function pmNewProject(){
+  var name=prompt('新项目名称:','新项目');
+  if(!name)return;
+  try{
+    var r=await fetch(A+'/api/pm/projects/new',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name})});
+    var d=await r.json();
+    if(d.project){
+      aSys('项目已创建: '+d.project.name,'success');
+      // Auto-activate the new project
+      await pmActivateProject(d.project.id);
+    }
+  }catch(e){aSys('创建失败: '+e,'error')}
+}
+
+async function pmLoadProjects(){
+  try{
+    var r=await fetch(A+'/api/pm/projects');
+    var d=await r.json();
+    _pmProjects=d.projects||[];
+    // Auto-set active project from server response
+    var activeProj = _pmProjects.find(function(p){return p.is_active});
+    if(activeProj && !_pmActiveProject){
+      _pmActiveProject = activeProj;
+    }
+    renderPMProjectList();
+  }catch(e){console.error(e)}
+}
+
+function renderPMProjectList(){
+  var el=$('pmProjectList');
+  var chat=$('pmChatArea');
+  if(!_pmProjects.length){
+    el.innerHTML='<div style="color:var(--text-tertiary);font-size:.82rem;padding:20px;text-align:center">暂无项目，点击"新建项目"开始</div>';
+    chat.style.display='none';
+    return;
+  }
+  chat.style.display='none';
+  var h='';
+  _pmProjects.forEach(function(p){
+    var isActive=_pmActiveProject&&_pmActiveProject.id===p.id?' active':'';
+    var isServerActive=p.is_active?' active':'';
+    var activeClass=isActive||isServerActive?' active':'';
+    var badge=(p.is_active)?' <span style="font-size:.6rem;background:var(--green);color:#fff;padding:2px 8px;border-radius:8px;margin-left:6px;vertical-align:middle;font-weight:700">当前</span>':'';
+    var borderStyle=activeClass?'border-left:3px solid var(--green);':'';
+    h+='<div class="pm-project-card'+activeClass+'" style="'+borderStyle+'" onclick="pmActivateProject(\''+p.id+'\')">';
+    h+='<h4>'+e2(p.name||p.id)+badge+'</h4>';
+    h+='<p>'+(p.description?e2(p.description):'点击激活项目')+'</p>';
+    if(p.updated_at){var _ud=new Date(p.updated_at*1000);var _us=_ud.toLocaleDateString('zh-CN')+' '+_ud.toLocaleTimeString('zh-CN',{hour12:false});h+='<p style="margin-top:2px;font-size:.62rem;color:var(--text-quaternary);font-family:var(--mono)">'+_us+'</p>';}
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+
+async function pmActivateProject(pid){
+  try{
+    var r=await fetch(A+'/api/pm/projects/'+pid+'/activate',{method:'POST'});
+    var d=await r.json();
+    _pmActiveProject=d.project||_pmProjects.find(function(p){return p.id===pid});
+    _pmChatMsgs=d.messages||[];
+    $('pmChatArea').style.display='flex';
+    $('pmChatArea').style.flexDirection='column';
+    $('pmChatArea').style.height='calc(100vh - 120px)';
+    $('pmToolbar').style.display='flex';
+    $('pmProjectList').style.display='none';
+    // 渲染历史到终端
+    renderTerminalHistory();
+    $('ti').focus();
+  }catch(e){aSys('激活失败: '+e,'error')}
+}
+
+function renderTerminalHistory(){
+  _pmTerminal=$('pmTerminal');
+  if(!_pmTerminal)return;
+  _pmTerminal.innerHTML='';
+  if(!_pmChatMsgs.length){
+    _pmTerminal.innerHTML='<div style="color:var(--text-tertiary);text-align:center;padding:40px">输入需求开始工作...</div>';
+    return;
+  }
+  _pmChatMsgs.forEach(function(m){
+    var role=m.role||'';
+    var content=m.content||'';
+    if(role==='user'){
+      if(content.indexOf('\u5de5\u5177\u6267\u884c\u7ed3\u679c:')===0||content.indexOf('[')>-1&&content.indexOf('\u7ed3\u679c:')>-1){
+        pmTerminalLog('tool_result',content.replace(/^\u5de5\u5177\u6267\u884c\u7ed3\u679c:\s*\n?/,'').split('\n\u8bf7\u6839\u636e')[0].slice(0,80)+(content.length>80?'...':''),{});
+      }else{
+        pmTerminalLog('response',content);
+      }
+    }else if(role==='tool_call'){
+      var parsed=null;
+      try{parsed=JSON.parse(content)}catch(e){}
+      if(parsed&&parsed.tool){
+        var desc=parsed.tool;
+        var args=parsed.args||{};
+        if(desc==='read_file')desc='📄 读取 '+e2(args.filename||'');
+        else if(desc==='read_file_lines')desc='📄 读取 '+e2(args.filename||'')+' L'+(args.start||1)+'-'+(args.end||'end');
+        else if(desc==='create_file')desc='✨ 新建 '+e2(args.filename||'');
+        else if(desc==='write_file')desc='📝 写入 '+e2(args.filename||'');
+        else if(desc==='patch_file')desc='✏️ 修改 '+e2(args.filename||'');
+        else if(desc==='append_file')desc='📎 追加 '+e2(args.filename||'');
+        else if(desc==='rename_file')desc='🔄 重命名';
+        else if(desc==='delete_file')desc='🗑 删除 '+e2(args.filename||'');
+        else if(desc==='list_workspace')desc='📂 列出文件';
+        else if(desc==='get_cwd')desc='📍 获取路径';
+        else if(desc==='run_code')desc='⚡ 运行代码';
+        else if(desc==='git_init')desc='Git init';
+        else if(desc==='git_commit')desc='Git commit: '+(args.message||'');
+        else if(desc==='git_log')desc='Git log';
+        else if(desc==='git_rollback')desc='Git rollback';
+        else if(desc==='import_zip')desc='📦 导入';
+        else if(desc==='done')desc='✅ 完成';
+        else desc='🔧 '+desc;
+        pmTerminalLog('tool_call',desc,args);
+      }else{
+        pmTerminalLog('tool_call',content.slice(0,200),{});
+      }
+    }else if(role==='tool_result'){
+      var parsed=null;
+      try{parsed=JSON.parse(content)}catch(e){}
+      if(parsed&&parsed.tool){
+        var tool=parsed.tool;
+        var r=parsed.result||{};
+        var summary='';
+        if(tool==='read_file')summary='✓ '+e2(r.filename||'')+' ('+(r.total_lines||0)+' 行)';
+        else if(tool==='read_file_lines')summary='✓ '+e2(r.showing||'');
+        else if(tool==='create_file')summary='✓ 已创建 ('+(r.lines||0)+' 行)';
+        else if(tool==='write_file')summary='✓ 已写入 ('+(r.size||0)+' 字节)';
+        else if(tool==='patch_file')summary=r.success?'✓ 已修改':'✗ '+e2(r.error||'');
+        else if(tool==='append_file')summary='✓ 已追加';
+        else if(tool==='rename_file')summary=r.success?'✓ 重命名':'✗ '+e2(r.error||'');
+        else if(tool==='delete_file')summary=r.success?'✓ 已删除':'✗ '+e2(r.error||'');
+        else if(tool==='list_workspace')summary='✓ '+(r.files||[]).length+' 个文件';
+        else if(tool==='get_cwd')summary='✓ '+e2(r.workspace||'');
+        else if(tool==='run_code'){summary=r.stdout?'✓ '+r.stdout.trim().slice(0,80):(r.stderr?'✗ '+r.stderr.trim().slice(0,80):'✓ done')}
+        else if(tool==='git_commit')summary='✓ committed';
+        else if(tool==='git_init')summary='✓ repo initialized';
+        else if(tool==='git_log')summary='✓ '+(r.commits||[]).length+' commits';
+        else if(tool==='done')summary='✅ '+e2(r.summary||'done');
+        else summary=r.error?'✗ '+e2(r.error):'✓ ok';
+        pmTerminalLog('tool_result',summary,r);
+      }else{
+        pmTerminalLog('tool_result',content.slice(0,200),{});
+      }
+    }else if(role==='assistant'||role==='pm'){
+      pmTerminalLog('response',content);
+    }else{
+      pmTerminalLog('response',content);
+    }
+  });
+  if(_pmTerminal)_pmTerminal.scrollTop=_pmTerminal.scrollHeight;
+}
+
+function renderPMChat(){}
+
+async function pmAgentSend(){
+  var inp=$('ti');
+  var msg=inp.value.trim();
+  if(!msg)return;
+  inp.value='';
+  if(!_pmActiveProject){
+    try{
+      var r=await fetch(A+'/api/pm/projects/new',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:msg.slice(0,20)||'新项目'})});
+      var d=await r.json();
+      if(d.project){
+        await pmActivateProject(d.project.id);
+        _pmChatMsgs.push({role:'user',content:msg});
+        pmTerminalLog('response','> '+msg);
+        pmStreamStart();
+        var modelEl=$('mainModelSelect');
+        var model=modelEl?modelEl.value:'';
+        var body={message:msg};
+        if(model)body.model=model;
+        var ac2=new AbortController();var acTimer2=setTimeout(function(){ac2.abort()},180000);
+        var r2=await fetch(A+'/api/pm/projects/'+_pmActiveProject.id+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ac2.signal});
+        clearTimeout(acTimer2);
+        var d2=await r2.json();
+        // Fallback: if SSE agent_response never arrived, use fetch response directly
+        if(!_pmStreamDone){pmStreamEnd();if(d2.message)pmTerminalLog('response',d2.message);else if(d2.error)pmTerminalLog('error',d2.error);}
+      }
+    }catch(e){if(e.name==='AbortError'){pmStreamEnd();pmTerminalLog('error','请求超时，请重试')}else{pmTerminalLog('error','错误: '+e);pmStreamEnd()}}
+    return;
+  }
+  _pmChatMsgs.push({role:'user',content:msg});
+  pmTerminalLog('response','> '+msg);
+  pmStreamStart();
+  var modelEl=$('mainModelSelect');
+  var model=modelEl?modelEl.value:'';
+  var body={message:msg};
+  if(model)body.model=model;
+  var ac=new AbortController();var acTimer=setTimeout(function(){ac.abort()},180000);
+  try{
+    var r=await fetch(A+'/api/pm/projects/'+_pmActiveProject.id+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ac.signal});
+    clearTimeout(acTimer);
+    var d=await r.json();
+    // Fallback: if SSE agent_response never arrived, use fetch response directly
+    if(!_pmStreamDone){pmStreamEnd();if(d.message)pmTerminalLog('response',d.message);else if(d.error)pmTerminalLog('error',d.error);}
+  }catch(e){clearTimeout(acTimer);if(e.name==='AbortError'){pmStreamEnd();pmTerminalLog('error','请求超时，请重试')}else{pmTerminalLog('error','错误: '+e);pmStreamEnd()}}
+}
+
+async function pmGenerateDoc(){
+  if(!_pmActiveProject)return;
+  aSys('正在生成需求文档...','info');
+  try{
+    var r=await fetch(A+'/api/pm/approve',{method:'POST'});
+    var d=await r.json();
+    if(d.error){aSys('生成失败: '+d.error,'error');return}
+    aSys('需求文档已生成','success');
+  }catch(e){aSys('生成失败: '+e,'error')}
+}
+
+function pmBackToList(){
+  $('pmChatArea').style.display='none';
+  $('pmToolbar').style.display='none';
+  $('pmProjectList').style.display='';
+  _pmActiveProject=null;
+  pmLoadProjects();
+}
+
+async function pmDeleteProject(){
+  if(!_pmActiveProject)return;
+  if(!localStorage.getItem('w3skipConfirm')&&!confirm('确认删除项目 "'+_pmActiveProject.name+'" ？此操作不可恢复。'))return;
+  try{
+    await fetch(A+'/api/pm/projects/'+_pmActiveProject.id,{method:'DELETE'});
+    aSys('✓ 项目已删除','success');
+    pmBackToList();
+  }catch(e){aSys('删除失败: '+e,'error')}
+}
+
+// ═══════════════ Confirm Dialog ═══════════════
+function confirmAction(msg,cb){
+  if(localStorage.getItem('w3skipConfirm')){cb(true);return}
+  var bg=document.createElement('div');bg.className='modal-bg open';
+  bg.innerHTML='<div class="modal" style="max-width:400px;text-align:center">'
+    +'<div style="font-size:1.5rem;margin-bottom:12px">⚠️</div>'
+    +'<div style="font-size:.9rem;margin-bottom:20px">'+e2(msg)+'</div>'
+    +'<div style="display:flex;gap:10px;justify-content:center">'
+    +'<button class="tb" onclick="this.closest(\'.modal-bg\').remove()">取消</button>'
+    +'<button class="tb pri" onclick="this.closest(\'.modal-bg\').remove();('+cb.toString()+')(true)">确认</button>'
+    +'</div></div>';
+  document.body.appendChild(bg);
+}
+
+// ═══════════════ Plan Mode — File Approval Queue ═══════════════
+var _planApprovalQueue=[];
+function addPlanApproval(file, oldContent, newContent){
+  _planApprovalQueue.push({file:file, oldContent:oldContent, newContent:newContent, status:'pending'});
+  renderPlanApprovals();
+  aSys('📋 Plan 模式: 收到文件修改提案 — '+file,'info');
+}
+function approvePlanChange(idx){
+  if(idx<0||idx>=_planApprovalQueue.length)return;
+  var item=_planApprovalQueue[idx];
+  if(item.status!=='pending')return;
+  item.status='approved';
+  // Call the backend to actually apply the change
+  if(_pmActiveProject){
+    fetch(A+'/api/pm/projects/'+_pmActiveProject.id+'/approve-file',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:item.file,content:item.newContent,action:'apply'})}).catch(function(){});
+  }
+  aSys('✓ 已同意修改: '+item.file,'success');
+  renderPlanApprovals();
+}
+function rejectPlanChange(idx){
+  if(idx<0||idx>=_planApprovalQueue.length)return;
+  var item=_planApprovalQueue[idx];
+  if(item.status!=='pending')return;
+  item.status='rejected';
+  aSys('✗ 已拒绝修改: '+item.file,'dim');
+  renderPlanApprovals();
+}
+function renderPlanApprovals(){
+  var el=$('planApprovalPanel');
+  if(!el)return;
+  var pending=_planApprovalQueue.filter(function(a){return a.status==='pending'});
+  if(!pending.length){el.style.display='none';return}
+  el.style.display='block';
+  var h='<div style="font-size:.78rem;font-weight:600;margin-bottom:8px;color:var(--accent)">📋 文件修改审批 ('+pending.length+' 待处理)</div>';
+  pending.forEach(function(a,idx){
+    // Find original index in full queue
+    var realIdx=_planApprovalQueue.indexOf(a);
+    var oldLines=(a.oldContent||'').split('\n');
+    var newLines=(a.newContent||'').split('\n');
+    var summary=Math.abs(newLines.length-oldLines.length);
+    var changeDesc=summary>0?(newLines.length>oldLines.length?'+'+summary+'行':'-'+summary+'行'):'内容变更';
+    h+='<div class="fcard" style="margin-bottom:8px">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between">';
+    h+='<span class="nm">'+e2(a.file)+'</span>';
+    h+='<div style="display:flex;gap:6px">';
+    h+='<button class="tb sm" style="background:var(--green);color:#fff;border-color:var(--green)" onclick="approvePlanFile('+realIdx+')">✓ 同意</button>';
+    h+='<button class="tb sm" onclick="rejectPlanFile('+realIdx+')">✗ 拒绝</button>';
+    h+='</div></div>';
+    // Show a preview of changes
+    if(a.newContent){
+      var preview=a.newContent.split('\n').slice(0,5).join('\n');
+      h+='<pre style="font-family:var(--mono);font-size:.68rem;color:var(--text-secondary);background:var(--surface-code);padding:8px;border-radius:var(--r-sm);margin-top:6px;max-height:60px;overflow:auto;white-space:pre-wrap">'+e2(preview)+'</pre>';
+    }
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+
+function approvePlanFile(idx){approvePlanChange(idx)}
+function rejectPlanFile(idx){rejectPlanChange(idx)}
+
+// ═══════════════ Build Mode — Multi-file Tabs ═══════════════
+var _buildFileTabs={'python':'main.py','html':'index.html'};
+var _buildFileOrder=['python','html'];
+function addBuildFileTab(key, filename){
+  if(_buildFileTabs[key])return;
+  _buildFileTabs[key]=filename;
+  _buildFileOrder.push(key);
+  refreshBuildFileTabs();
+}
+function refreshBuildFileTabs(){
+  var container=document.querySelector('#cpTabsContainer');
+  if(!container)return;
+  var h='';
+  _buildFileOrder.forEach(function(k){
+    var isActive=_pf===k?' active':'';
+    h+='<span class="cp-tab'+isActive+'" data-file="'+k+'" onclick="switchCP(this)">'+e2(_buildFileTabs[k]||k)+'</span>';
+  });
+  h+='<span class="cp-tab" style="color:var(--text-tertiary);font-size:.7rem;cursor:pointer" onclick="addNewBuildTab()" title="添加文件标签">+</span>';
+  container.innerHTML=h;
+}
+
+function addNewBuildTab(){
+  var filename=prompt('文件名 (如 utils.py, config.json):');
+  if(!filename||!filename.trim())return;
+  filename=filename.trim();
+  // Generate a safe key from the filename
+  var key=filename.replace(/[^a-zA-Z0-9_-]/g,'_');
+  // Make key unique
+  var base=key;
+  var counter=1;
+  while(_buildFileTabs[key]){key=base+'_'+counter;counter++}
+  addBuildFileTab(key, filename);
+  aSys('已添加标签: '+filename,'system');
+}
+
+// ═══════════════ Tab Key Mode Switch ═══════════════
+document.addEventListener('keydown',function(e){
+  if(e.key==='Tab'&&!e.ctrlKey&&!e.altKey&&!e.shiftKey){
+    // Don't intercept when typing in inputs/textareas
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+    e.preventDefault();
+    var modes=['pipeline','workflow','pm_agent'];
+    var cur=modes.indexOf(_mode);
+    var next=(cur+1)%modes.length;
+    switchMode(modes[next]);
+  }
+});
+
+// ═══════════════ Workspace Management ═══════════════
+function loadWsInfo(){
+  fetch(A+'/api/workspace/info').then(function(r){return r.json()}).then(function(d){
+    $('wsName').textContent=d.name||'workspace';
+    var h='<div style="font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:8px">'+e2(d.name||'workspace')+'</div>';
+    h+='<div style="font-size:.7rem;color:var(--text-tertiary);margin-bottom:4px">'+e2(d.path||'')+'</div>';
+    h+='<div style="font-size:.7rem;color:var(--text-secondary)">'+(d.files||[]).length+' 个文件, '+formatBytes(d.total_size||0)+'</div>';
+    if(d.files&&d.files.length){
+      h+='<div style="max-height:150px;overflow-y:auto;margin-top:8px">';
+      d.files.forEach(function(f){
+        h+='<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:.7rem;border-bottom:1px solid var(--divider)">';
+        h+='<span style="flex:1;color:var(--text)">'+e2(f.name)+'</span>';
+        h+='<span style="color:var(--text-tertiary);font-family:var(--mono)">'+formatBytes(f.size)+'</span>';
+        h+='</div>';
+      });
+      h+='</div>';
+    }
+    $('wsInfoPanel').innerHTML=h;
+  }).catch(function(){});
+}
+function formatBytes(b){if(b===0)return '0 B';var k=1024;var s=['B','KB','MB','GB'];var i=Math.floor(Math.log(b)/Math.log(k));return parseFloat((b/Math.pow(k,i)).toFixed(1))+' '+s[i]}
+function loadWsArchives(){
+  fetch(A+'/api/workspace/archives').then(function(r){return r.json()}).then(function(d){
+    var el=$('wsArchiveList');
+    var archives=d.archives||[];
+    if(!archives.length){el.innerHTML='<div style="color:var(--text-tertiary);text-align:center;padding:16px;font-size:.8rem">暂无归档</div>';return}
+    var h='';
+    archives.forEach(function(a){
+      h+='<div class="fcard" style="margin-bottom:8px;padding:10px 14px">';
+      h+='<div style="display:flex;align-items:center;justify-content:space-between">';
+      h+='<div><div style="font-weight:600;font-size:.82rem;color:var(--text)">'+e2(a.display_name||a.name)+'</div>';
+      h+='<div style="font-size:.65rem;color:var(--text-tertiary);margin-top:2px">'+(a.file_count||0)+' 个文件, '+formatBytes(a.total_size||0)+'</div></div>';
+      h+='<div style="display:flex;gap:6px">';
+      h+='<button class="tb sm pri" onclick="wsLoad(\''+e2(a.name)+'\')" style="padding:4px 10px;font-size:.68rem">加载</button>';
+      h+='<button class="tb sm" onclick="wsDeleteArchive(\''+e2(a.name)+'\')" style="padding:4px 10px;font-size:.68rem;color:var(--red)">删除</button>';
+      h+='</div></div></div>';
+    });
+    el.innerHTML=h;
+  }).catch(function(){});
+}
+function wsArchive(){
+  fetch(A+'/api/workspace/archive',{method:'POST'}).then(function(r){return r.json()}).then(function(d){
+    if(d.ok){aSys('✓ 工作区已归档: '+d.name,'success');loadWsArchives()}
+    else{aSys('归档失败: '+(d.error||''),'error')}
+  }).catch(function(e){aSys('归档失败: '+e,'error')});
+}
+function wsNew(){
+  if(!confirm('创建新工作区？当前工作区将自动归档。'))return;
+  fetch(A+'/api/workspace/new',{method:'POST'}).then(function(r){return r.json()}).then(function(d){
+    if(d.ok){aSys('✓ 新工作区已创建','success');loadWsInfo();loadWsArchives();fetchPreview()}
+    else{aSys('创建失败: '+(d.error||''),'error')}
+  }).catch(function(e){aSys('创建失败: '+e,'error')});
+}
+function wsLoad(name){
+  if(!confirm('加载归档 "'+name+'"？当前工作区将自动归档。'))return;
+  fetch(A+'/api/workspace/load/'+encodeURIComponent(name),{method:'POST'}).then(function(r){return r.json()}).then(function(d){
+    if(d.ok){aSys('✓ 已加载归档: '+d.loaded,'success');loadWsInfo();loadWsArchives();fetchPreview()}
+    else{aSys('加载失败: '+(d.error||''),'error')}
+  }).catch(function(e){aSys('加载失败: '+e,'error')});
+}
+function wsDeleteArchive(name){
+  if(!confirm('确认删除归档 "'+name+'"？'))return;
+  fetch(A+'/api/workspace/archive/'+encodeURIComponent(name),{method:'DELETE'}).then(function(r){return r.json()}).then(function(d){
+    if(d.ok){aSys('✓ 已删除归档','success');loadWsArchives()}
+    else{aSys('删除失败: '+(d.error||''),'error')}
+  }).catch(function(e){aSys('删除失败: '+e,'error')});
+}
+
+// ═══════════════ Initialize ═══════════════
+initTheme();
+cSSE();
+startPollingOnce();
+pmLoadProjects();
+loadWsInfo();
+window.addEventListener('beforeunload',function(){if(pollTimer)clearInterval(pollTimer);if(es)es.close();if(_wfSSE)_wfSSE.close()});
+
+// ═══════════════ Plugin Management ═══════════════
+
+var _plugins=[],_plEditing=null;
+
+async function refreshPlugins(){
+  try{
+    const r=await fetch(A+'/api/plugins');
+    const d=await r.json();
+    _plugins=d.plugins||[];
+    renderPluginList();
+    updatePluginSidebar();
+  }catch(e){console.error(e)}
+}
+
+function renderPluginList(){
+  const c=document.getElementById('plBody');
+  if(!_plugins.length){c.innerHTML='<p style="color:var(--text-tertiary);text-align:center;padding:20px">未发现插件</p>';return}
+  let h='<div style="display:flex;flex-direction:column;gap:8px">';
+  _plugins.forEach(p=>{
+    const st=p.state||'unloaded';
+    const isOn=st==='enabled';
+    const icon=p.icon||'🧩';
+    h+=`<div class="ac" style="opacity:${isOn?'1':'0.5'}">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:1.3rem">${icon}</span>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:.88rem">${e2(p.display_name||p.name)}</div>
+          <div style="font-size:.68rem;color:var(--text-tertiary);margin-top:2px">${e2(p.description||'')}</div>
+          <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+            <span class="kb ${isOn?'ok':'no'}" style="font-size:.55rem">${st==='enabled'?'已启用':st==='disabled'?'已禁用':st==='unloaded'?'未加载':st}</span>
+            <span class="skill-pill" style="font-size:.55rem">${p.plugin_type}</span>
+            <span style="font-size:.55rem;color:var(--text-tertiary)">v${p.version}</span>
+            <span style="font-size:.55rem;color:var(--text-tertiary)">调用:${p.call_count||0}</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+          <div class="tog ${isOn?'on':''}" onclick="togglePlugin('${p.name}',${!isOn})"></div>
+          <div style="display:flex;gap:4px">
+            <button class="tb sm" onclick="editPluginConfig('${p.name}')" title="配置">⚙</button>
+            <button class="tb sm" onclick="reloadSinglePlugin('${p.name}')" title="重载">↻</button>
+            <button class="tb sm" onclick="unloadSinglePlugin('${p.name}')" title="卸载" style="color:var(--red)">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+  h+='</div>';
+  c.innerHTML=h;
+}
+
+function updatePluginSidebar(){
+  const c=document.getElementById('sbPlugins');
+  const enabled=_plugins.filter(p=>p.state==='enabled');
+  if(!enabled.length){c.innerHTML='<span style="font-size:.65rem;color:var(--text-tertiary)">无</span>';return}
+  c.innerHTML=enabled.map(p=>`<span class="skill-pill" title="${e2(p.description||'')}">${p.icon||'🧩'} ${e2(p.display_name||p.name)}</span>`).join('');
+}
+
+async function togglePlugin(name,enable){
+  const ep=enable?'/api/plugins/'+name+'/enable':'/api/plugins/'+name+'/disable';
+  try{await fetch(A+ep,{method:'POST'});refreshPlugins()}catch(e){console.error(e)}
+}
+
+async function reloadSinglePlugin(name){
+  try{await fetch(A+'/api/plugins/'+name+'/reload',{method:'POST'});refreshPlugins()}catch(e){console.error(e)}
+}
+
+async function unloadSinglePlugin(name){
+  try{await fetch(A+'/api/plugins/'+name+'/unload',{method:'POST'});refreshPlugins()}catch(e){console.error(e)}
+}
+
+async function discoverPlugins(){
+  try{
+    const r=await fetch(A+'/api/plugins/discover');
+    const d=await r.json();
+    if(d.discovered&&d.discovered.length){
+      refreshPlugins();
+      const names=d.discovered.map(p=>p.display_name||p.name).join(', ');
+      aSys('已发现: '+names,'success');
+    }else{aSys('未发现新插件','info')}
+  }catch(e){console.error(e)}
+}
+
+function editPluginConfig(name){
+  _plEditing=name;
+  const p=_plugins.find(x=>x.name===name);
+  if(!p)return;
+  document.getElementById('plModTitle').textContent='配置: '+(p.display_name||p.name);
+  const body=document.getElementById('plModBody');
+  const schema=p.config_schema||{};
+  const current=p.current_config||{};
+  let h='';
+  if(schema.properties){
+    for(const[k,v]of Object.entries(schema.properties)){
+      const val=current[k]!==undefined?current[k]:(v.default!==undefined?v.default:'');
+      if(v.type==='boolean') h+=`<div class="fld" style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="plc_${k}" ${val?'checked':''} style="accent-color:var(--accent);width:16px;height:16px">${e2(v.title||k)}</label></div>`;
+      else h+=`<div class="fld" style="margin-top:12px"><label>${e2(v.title||k)}</label><input id="plc_${k}" value="${e2(String(val))}"></div>`;
+    }
+  }else{
+    h='<p style="color:var(--text-tertiary);font-size:.8rem">无可配置选项</p>';
+    h+='<div style="margin-top:12px"><label style="font-size:.66rem;color:var(--text-tertiary)">自定义 JSON 配置</label><textarea id="plc_raw" style="width:100%;min-height:80px;font-family:var(--mono);font-size:.78rem;padding:10px;background:var(--surface-input);border:1px solid var(--glass-border);color:var(--text);border-radius:var(--r-sm);resize:vertical">'+e2(JSON.stringify(current,null,2))+'</textarea></div>';
+  }
+  body.innerHTML=h;
+  document.getElementById('plMod').classList.add('open');
+}
+
+function closePlMod(){document.getElementById('plMod').classList.remove('open');_plEditing=null}
+
+async function savePlConfig(){
+  if(!_plEditing)return;
+  const p=_plugins.find(x=>x.name===_plEditing);
+  const schema=p?p.config_schema||{}:{};
+  const config={};
+  if(schema.properties){
+    for(const k of Object.keys(schema.properties)){
+      const el=document.getElementById('plc_'+k);
+      if(!el)continue;
+      const v=schema.properties[k];
+      config[k]=v.type==='boolean'?el.checked:el.value;
+    }
+  }else{
+    const raw=document.getElementById('plc_raw');
+    try{Object.assign(config,JSON.parse(raw.value))}catch(e){console.error(e)}
+  }
+  try{
+    await fetch(A+'/api/plugins/'+_plEditing+'/config',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(config)});
+    closePlMod();refreshPlugins();aSys('插件配置已保存','success');
+  }catch(e){console.error(e)}
+}
+
+// ═══════════════ Workflow Mode ═══════════════
+var _mode='pipeline', _wfs=[], _curWf=null, _nodes={}, _conns=[];
+var _wfSSE=null, _dragNode=null, _dragOff={x:0,y:0}, _dragConn=null;
+
+var NODE_TYPES={
+  prompt:{icon:'💬',label:'提示词',color:'var(--accent)',inputs:[],outputs:['text']},
+  llm:{icon:'🤖',label:'LLM',color:'var(--purple)',inputs:['text'],outputs:['text','tokens']},
+  code:{icon:'⚡',label:'代码',color:'var(--green)',inputs:['code'],outputs:['result','error','files']},
+  file_input:{icon:'📎',label:'文件输入',color:'var(--blue)',inputs:[],outputs:['file','text']},
+  image_input:{icon:'🖼️',label:'图片输入',color:'var(--green)',inputs:[],outputs:['image']},
+  video_input:{icon:'🎬',label:'视频输入',color:'var(--red)',inputs:[],outputs:['video']},
+  audio_input:{icon:'🔊',label:'音频输入',color:'var(--accent)',inputs:[],outputs:['audio']},
+  text_transform:{icon:'✂️',label:'文本处理',color:'var(--text-secondary)',inputs:['text'],outputs:['text']},
+  file_output:{icon:'📁',label:'文件输出',color:'var(--blue)',inputs:['file'],outputs:['result']},
+  image_output:{icon:'🖼️',label:'图片生成',color:'var(--green)',inputs:['text'],outputs:['image']},
+  condition:{icon:'🔀',label:'条件分支',color:'var(--accent)',inputs:['text'],outputs:['true','false']},
+  merge:{icon:'🔗',label:'合并',color:'var(--purple)',inputs:['text_a','text_b'],outputs:['text']},
+  loop:{icon:'🔄',label:'循环',color:'var(--blue)',inputs:['text'],outputs:['text']},
+  delay:{icon:'⏱️',label:'延迟',color:'var(--text-tertiary)',inputs:['text'],outputs:['text']},
+  http:{icon:'🌐',label:'HTTP',color:'var(--accent)',inputs:['text'],outputs:['text']},
+  output:{icon:'📤',label:'输出',color:'var(--green)',inputs:['text','file','image'],outputs:['result']},
+  search:{icon:'🔍',label:'搜索',color:'var(--blue)',inputs:['text'],outputs:['text','results']},
+  scraper:{icon:'🕷️',label:'爬虫',color:'var(--purple)',inputs:['text'],outputs:['text','data']},
+  router:{icon:'🧭',label:'路由',color:'var(--accent)',inputs:['text'],outputs:['a','b','c']},
+  api_call:{icon:'📡',label:'API调用',color:'var(--green)',inputs:['text'],outputs:['text','status']},
+  note:{icon:'📝',label:'备注',color:'var(--text-tertiary)',inputs:[],outputs:[]},
+  variable:{icon:'📦',label:'变量',color:'var(--blue)',inputs:[],outputs:['value']},
+  timer:{icon:'⏰',label:'定时器',color:'var(--red)',inputs:[],outputs:['trigger']}
+};
+
+function switchMode(m){
+  _mode=m;
+  // Update topbar mode buttons
+  document.querySelectorAll('.topbar .mode-btn').forEach(function(b){b.classList.remove('pri','active')});
+  // Update sidebar mode buttons
+  document.querySelectorAll('#sbModeSec .tb').forEach(function(b){b.classList.remove('pri')});
+
+  if(m==='pipeline'){
+    // Build 模式 — 完整编码，可直接修改文件
+    $('modePipeline').classList.add('pri','active');
+    $('sbModePipeline').classList.add('pri');
+    var _pvMap={idle:'vReq',requirements:'vReq',planning:'vPlan',coding:'vCode',review:'vReview'};
+    showV($('vCode')&&phase==='coding'?'vCode':(_pvMap[phase]||'vReq'));
+    $('vWorkflow').classList.remove('active');
+    $('vPMAgent').classList.remove('active');
+    var _actMap={idle:'actReq',requirements:'actReq',planning:'actPlan',coding:'actCode',review:'actReview'};
+    ['actReq','actPlan','actCode','actReview'].forEach(function(a){$(a).classList.add('hidden')});
+    var _showAct=_actMap[phase]||'actReq';
+    if($(_showAct))$(_showAct).classList.remove('hidden');
+    $('mainInputBar').style.display='';
+    $('mainModelSelect').style.display='none';
+    $('sbModeSec').style.display='';$('sbWfFilesSec').style.display='none';$('sbWfFilesDiv').style.display='none';
+  }else if(m==='workflow'){
+    // Compose 模式 — 可视化工作流编排
+    $('modeWorkflow').classList.add('pri','active');
+    $('sbModeWorkflow').classList.add('pri');
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
+    $('vWorkflow').classList.add('active');
+    ['actReq','actPlan','actCode','actReview'].forEach(function(a){$(a).classList.add('hidden')});
+    $('mainInputBar').style.display='none';
+    $('sbModeSec').style.display='';$('sbWfFilesSec').style.display='';$('sbWfFilesDiv').style.display='';
+    loadWFList();
+  }else if(m==='pm_agent'){
+    // Plan 模式 — 独立的项目管理+工具调用，与 Build 完全分开
+    $('modePMAgent').classList.add('pri','active');
+    $('sbModePMAgent').classList.add('pri');
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');v.style.overflow='auto';v.style.display='';v.style.flexDirection=''});
+    $('vPMAgent').classList.add('active');
+    $('vPMAgent').style.overflow='hidden';
+    $('vPMAgent').style.display='flex';
+    $('vPMAgent').style.flexDirection='column';
+    $('pmInputBar').style.display='flex';
+    ['actReq','actPlan','actCode','actReview'].forEach(function(a){$(a).classList.add('hidden')});
+    $('mainInputBar').style.display='none';
+    $('sbWfFilesSec').style.display='none';$('sbWfFilesDiv').style.display='none';
+    pmLoadProjects();
+  }
+}
+
+function loadWFList(){
+  fetch(A+'/api/workflows').then(function(r){return r.json()}).then(function(d){
+    _wfs=d.workflows||[];
+    var sel=$('wfSelect');
+    sel.innerHTML='';
+    _wfs.forEach(function(w){var o=document.createElement('option');o.value=w.id;o.textContent=w.name||w.id;sel.appendChild(o)});
+    if(_wfs.length)loadWF(_wfs[0].id);
+  }).catch(function(){});
+}
+
+function loadWF(wid){
+  fetch(A+'/api/workflows/'+wid).then(function(r){return r.json()}).then(function(d){
+    if(!d.workflow)return;
+    _curWf=d.workflow;
+    _nodes=_curWf.nodes||{};
+    _conns=_curWf.connections||[];
+    renderWFCanvas();
+    $('sbWfNodeCount').textContent=Object.keys(_nodes).length;
+    $('sbWfConnCount').textContent=_conns.length;
+  }).catch(function(){});
+}
+
+function newWF(){
+  var name=prompt('工作流名称:','新工作流');
+  if(!name)return;
+  fetch(A+'/api/workflows/new?name='+encodeURIComponent(name),{method:'POST'}).then(function(r){return r.json()}).then(function(d){
+    if(d.workflow){loadWFList();loadWF(d.workflow.id)}
+  }).catch(function(){});
+}
+
+function deleteWF(){
+  if(!_curWf)return;
+  if(!confirm('确认删除此工作流?'))return;
+  fetch(A+'/api/workflows/'+_curWf.id,{method:'DELETE'}).then(function(){loadWFList();_curWf=null;_nodes={};_conns=[];renderWFCanvas();$('sbWfNodeCount').textContent='0';$('sbWfConnCount').textContent='0'});
+}
+
+function importWFPackage(){
+  var input=document.createElement('input');
+  input.type='file';
+  input.accept='.zip';
+  input.onchange=function(){
+    if(!input.files.length)return;
+    var fd=new FormData();
+    fd.append('package',input.files[0]);
+    fetch(A+'/api/workflows/import',{method:'POST',body:fd})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(d.workflow){loadWFList();loadWF(d.workflow.id);aSys('已导入工作流包','success')}
+      else if(d.error){aSys('导入失败: '+d.error,'error')}
+    })
+    .catch(function(e){aSys('导入失败','error')});
+  };
+  input.click();
+}
+
+function renderWFCanvas(){
+  var nodesEl=$('wfNodes');
+  nodesEl.innerHTML='';
+  // Render nodes
+  Object.keys(_nodes).forEach(function(nid){
+    var n=_nodes[nid];
+    var t=NODE_TYPES[n.type]||NODE_TYPES.prompt;
+    var div=document.createElement('div');
+    div.className='wf-node'+(n._status==='running'?' running':n._status==='done'?' done':n._status==='error'?' error':'');
+    div.id='wfn-'+n.id;
+    div.style.left=n.x+'px';div.style.top=n.y+'px';
+    div.innerHTML='<div class="wf-node-head"><span class="nicon">'+t.icon+'</span><span>'+e2(n.config&&n.config.title?n.config.title:t.label)+'</span><span class="ntype">'+t.label+'</span></div>'+
+      '<div class="wf-node-body">'+e2(n.config&&n.config.prompt?n.config.prompt.slice(0,60):'')+'</div>'+
+      '<div class="wf-node-ports"><div class="wf-node-ports-in">'+t.inputs.map(function(p){return '<div class="wf-port in" data-nid="'+n.id+'" data-port="'+p+'" onmousedown="startConn(event,this)"><span class="wf-port-label">'+p+'</span></div>'}).join('')+'</div><div class="wf-node-ports-out">'+t.outputs.map(function(p){return '<div class="wf-port out" data-nid="'+n.id+'" data-port="'+p+'" onmousedown="startConn(event,this)"><span class="wf-port-label">'+p+'</span></div>'}).join('')+'</div></div>';
+    div.onmousedown=function(e){if(e.target.classList.contains('wf-port'))return;startDrag(e,n.id)};
+    div.ondblclick=function(e){e.stopPropagation();showNodeConfig(n.id)};
+    nodesEl.appendChild(div);
+  });
+  // Render connections
+  renderConnections();
+  // Show palette
+  renderPalette(nodesEl);
+  // Update sidebar counts
+  $('sbWfNodeCount').textContent=Object.keys(_nodes).length;
+  $('sbWfConnCount').textContent=_conns.length;
+}
+
+function renderPalette(container){
+  var existing=container.querySelector('.wf-palette');
+  if(existing)return;
+  var div=document.createElement('div');div.className='wf-palette';
+  div.innerHTML='<h4>节点</h4>'+Object.keys(NODE_TYPES).map(function(k){var v=NODE_TYPES[k];return '<div class="wf-palette-item" onmousedown="addNodeDrag(event,\''+k+'\')"><span class="icon">'+v.icon+'</span>'+v.label+'</div>'}).join('');
+  container.appendChild(div);
+}
+
+function renderConnections(){
+  var svg=$('wfSvg');svg.innerHTML='';
+  _conns.forEach(function(c){
+    var sn=_nodes[c.source_node];var tn=_nodes[c.target_node];
+    if(!sn||!tn)return;
+    var sp=document.querySelector('#wfn-'+sn.id+' .wf-port.out[data-port="'+c.source_port+'"]');
+    var tp=document.querySelector('#wfn-'+tn.id+' .wf-port.in[data-port="'+c.target_port+'"]');
+    if(!sp||!tp)return;
+    var sr=sp.getBoundingClientRect();var tr=tp.getBoundingClientRect();
+    var cr=$('wfCanvas').getBoundingClientRect();
+    var x1=sr.left+sr.width/2-cr.left;var y1=sr.top+sr.height/2-cr.top;
+    var x2=tr.left+tr.width/2-cr.left;var y2=tr.top+tr.height/2-cr.top;
+    var dx=Math.abs(x2-x1)*0.5;
+    var d='M'+x1+','+y1+' C'+(x1+dx)+','+y1+' '+(x2-dx)+','+y2+' '+x2+','+y2;
+    svg.innerHTML+='<path d="'+d+'" class="'+(c._status||'')+'" data-cid="'+c.id+'"/><path d="'+d+'" class="conn-hitarea" data-cid="'+c.id+'" onclick="removeConn(\''+c.id+'\')"/>';
+  });
+}
+
+function addNodeDrag(e,type){
+  e.preventDefault();
+  var canvas=$('wfCanvas');var cr=canvas.getBoundingClientRect();
+  var x=e.clientX-cr.left;var y=e.clientY-cr.top;
+  // If click is on palette (not canvas), spawn at center
+  if(x<200||y<50){x=cr.width/2-90;y=cr.height/2-40}
+  if(!_curWf)return;
+  fetch(A+'/api/workflows/'+_curWf.id+'/nodes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:type,x:x-90,y:y-40})})
+  .then(function(r){return r.json()}).then(function(d){if(d.error){aSys('创建节点失败: '+d.error,'error');return}if(d.node){_nodes[d.node.id]=d.node;renderWFCanvas()}}).catch(function(e){aSys('创建节点失败','error')});
+}
+
+function startDrag(e,nid){
+  _dragNode=nid;
+  var el=document.getElementById('wfn-'+nid);
+  var r=el.getBoundingClientRect();
+  _dragOff={x:e.clientX-r.left,y:e.clientY-r.top};
+  document.onmousemove=onDrag;document.onmouseup=endDrag;
+  el.style.zIndex=10;
+}
+function onDrag(e){
+  if(!_dragNode)return;
+  var canvas=$('wfCanvas');var cr=canvas.getBoundingClientRect();
+  var x=e.clientX-cr.left-_dragOff.x;var y=e.clientY-cr.top-_dragOff.y;
+  var el=document.getElementById('wfn-'+_dragNode);
+  el.style.left=x+'px';el.style.top=y+'px';
+  _nodes[_dragNode].x=x;_nodes[_dragNode].y=y;
+  renderConnections();
+}
+function endDrag(e){
+  if(_dragNode){
+    var n=_nodes[_dragNode];
+    fetch(A+'/api/workflows/'+_curWf.id+'/nodes/'+_dragNode,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({x:n.x,y:n.y})}).catch(function(){});
+  }
+  _dragNode=null;document.onmousemove=null;document.onmouseup=null;
+  // Auto-save workflow
+  if(_curWf)debounceWFSave();
+}
+var _wfSaveTimer=null;
+function debounceWFSave(){if(_wfSaveTimer)clearTimeout(_wfSaveTimer);_wfSaveTimer=setTimeout(function(){if(_curWf)saveWF()},2000)}
+function saveWF(){if(!_curWf)return;fetch(A+'/api/workflows/'+_curWf.id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({nodes:_nodes,connections:_conns})}).catch(function(){})}
+
+function startConn(e,portEl){
+  e.preventDefault();e.stopPropagation();
+  var nid=portEl.dataset.nid;var port=portEl.dataset.port;
+  var isOut=portEl.classList.contains('out');
+  _dragConn={nid:nid,port:port,isOut:isOut,startX:e.clientX,startY:e.clientY};
+  document.onmousemove=onConnDrag;document.onmouseup=endConnDrag;
+}
+function onConnDrag(e){}
+function endConnDrag(e){
+  document.onmousemove=null;document.onmouseup=null;
+  if(!_dragConn)return;
+  var el=document.elementFromPoint(e.clientX,e.clientY);
+  var port=el?el.closest('.wf-port'):null;
+  if(port&&port.dataset.nid!==_dragConn.nid){
+    var snid=_dragConn.isOut?_dragConn.nid:port.dataset.nid;
+    var sport=_dragConn.isOut?_dragConn.port:port.dataset.port;
+    var tnid=_dragConn.isOut?port.dataset.nid:_dragConn.nid;
+    var tport=_dragConn.isOut?port.dataset.port:_dragConn.port;
+    fetch(A+'/api/workflows/'+_curWf.id+'/connections',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_node:snid,source_port:sport,target_node:tnid,target_port:tport})})
+    .then(function(r){return r.json()}).then(function(d){if(d.error){aSys('连接失败: '+d.error,'error');return}if(d.connection){_conns.push(d.connection);renderConnections();$('sbWfConnCount').textContent=_conns.length}}).catch(function(e){aSys('连接失败','error')});
+  }
+  _dragConn=null;
+}
+
+function removeConn(cid){
+  fetch(A+'/api/workflows/'+_curWf.id+'/connections/'+cid,{method:'DELETE'}).then(function(){
+    _conns=_conns.filter(function(c){return c.id!==cid});renderConnections();$('sbWfConnCount').textContent=_conns.length;
+  }).catch(function(){});
+}
+
+function showNodeConfig(nid){
+  var n=_nodes[nid];if(!n)return;
+  var t=NODE_TYPES[n.type]||NODE_TYPES.prompt;
+  $('wfPanelTitle').textContent=t.icon+' '+t.label+' 配置';
+  var h='';
+  h+='<div class="fld"><label>标题</label><input id="nc_title" value="'+e2(n.config&&n.config.title||'')+'" placeholder="'+t.label+'"></div>';
+  if(n.type==='prompt'){
+    h+='<div class="fld"><label>提示词</label><textarea id="nc_prompt">'+e2(n.config&&n.config.prompt||'')+'</textarea></div>';
+  }else if(n.type==='llm'){
+    h+='<div class="fld"><label>系统提示词</label><textarea id="nc_system_prompt">'+e2(n.config&&n.config.system_prompt||'')+'</textarea></div>';
+    h+='<div class="fld"><label>温度</label><input id="nc_temp" type="number" step="0.1" min="0" max="2" value="'+(n.config&&n.config.temperature||0.7)+'"></div>';
+    h+='<div class="fld"><label>最大 Token</label><input id="nc_max_tokens" type="number" value="'+(n.config&&n.config.max_tokens||4096)+'"></div>';
+    h+='<div class="fld"><label>模型</label><select id="nc_model" onchange="onWfModelChange(this)">';
+    h+='<option value="">使用默认</option>';
+    var _curModel=n.config&&n.config.model||'';
+    var _models=['deepseek-v4-flash','deepseek-v4-pro','gpt-4o','gpt-4o-mini','claude-sonnet-4-20250514'];
+    _models.forEach(function(_m){h+='<option value="'+_m+'"'+(_curModel===_m?' selected':'')+'>'+_m+'</option>';});
+    h+='</select></div>';
+    h+='<div class="fld"><label>自定义模型名</label><input id="nc_custom_model" placeholder="输入任意模型名" value="'+e2(_curModel&&!_models.includes(_curModel)?_curModel:'')+'" oninput="document.getElementById(\'nc_model\').value=\'\'"></div>';
+    h+='<div class="fld"><label>Provider</label><select id="nc_provider">';
+    h+='<option value="">自动</option>';
+    var _curProv=n.config&&n.config.provider||'';
+    ['deepseek','siliconflow','openai'].forEach(function(p){h+='<option value="'+p+'"'+(_curProv===p?' selected':'')+'>'+p+'</option>';});
+    h+='</select></div>';
+    h+='<div class="fld"><label>API Key (可选)</label><input id="nc_api_key" type="password" placeholder="留空则使用全局配置"></div>';
+  }else if(n.type==='code'){
+    h+='<div class="fld"><label>代码</label><textarea id="nc_code" style="min-height:120px">'+e2(n.config&&n.config.code||'')+'</textarea></div>';
+  }else if(n.type==='text_transform'){
+    h+='<div class="fld"><label>操作</label><select id="nc_operation"><option value="split">分割</option><option value="merge">合并</option><option value="replace">替换</option><option value="format">格式化</option><option value="extract_json">提取JSON</option></select></div>';
+    h+='<div class="fld"><label>参数</label><input id="nc_params" value="'+e2(n.config&&n.config.params||'')+'"></div>';
+  }else if(n.type==='condition'){
+    h+='<div class="fld"><label>条件表达式</label><input id="nc_expr" value="'+e2(n.config&&n.config.expression||'')+'" placeholder="result > 0"></div>';
+  }else if(n.type==='loop'){
+    h+='<div class="fld"><label>最大次数</label><input id="nc_max_iter" type="number" value="'+(n.config&&n.config.max_iterations||10)+'"></div>';
+  }else if(n.type==='delay'){
+    h+='<div class="fld"><label>延迟(秒)</label><input id="nc_delay" type="number" value="'+(n.config&&n.config.seconds||1)+'"></div>';
+  }else if(n.type==='file_input'){
+    h+='<div class="fld"><label>文件名</label><input id="nc_filename" value="'+e2(n.config&&n.config.filename||'')+'" placeholder="上传文件后选择"></div>';
+  }else if(n.type==='http'||n.type==='api_call'){
+    h+='<div class="fld"><label>URL</label><input id="nc_url" value="'+e2(n.config&&n.config.url||'')+'"></div>';
+    h+='<div class="fld"><label>方法</label><select id="nc_method"><option value="GET">GET</option><option value="POST">POST</option><option value="PUT">PUT</option></select></div>';
+    h+='<div class="fld"><label>请求体</label><textarea id="nc_body" style="min-height:60px">'+e2(n.config&&n.config.body||'')+'</textarea></div>';
+  }else if(n.type==='search'){
+    h+='<div class="fld"><label>搜索查询</label><input id="nc_query" value="'+e2(n.config&&n.config.query||'')+'"></div>';
+    h+='<div class="fld"><label>最大结果数</label><input id="nc_max_results" type="number" value="'+(n.config&&n.config.max_results||5)+'"></div>';
+  }else if(n.type==='scraper'){
+    h+='<div class="fld"><label>URL 模式</label><input id="nc_url_pattern" value="'+e2(n.config&&n.config.url_pattern||'')+'"></div>';
+    h+='<div class="fld"><label>选择器</label><input id="nc_selector" value="'+e2(n.config&&n.config.selector||'')+'"></div>';
+  }else if(n.type==='router'){
+    h+='<div class="fld"><label>路由规则</label><textarea id="nc_rules" style="min-height:60px">'+e2(n.config&&n.config.rules||'')+'</textarea></div>';
+  }else if(n.type==='variable'){
+    h+='<div class="fld"><label>变量名</label><input id="nc_var_name" value="'+e2(n.config&&n.config.var_name||'')+'"></div>';
+    h+='<div class="fld"><label>默认值</label><input id="nc_default_value" value="'+e2(n.config&&n.config.default_value||'')+'"></div>';
+  }else if(n.type==='timer'){
+    h+='<div class="fld"><label>间隔(秒)</label><input id="nc_interval" type="number" value="'+(n.config&&n.config.interval||60)+'"></div>';
+  }else if(n.type==='note'){
+    h+='<div class="fld"><label>备注内容</label><textarea id="nc_note" style="min-height:60px">'+e2(n.config&&n.config.note||'')+'</textarea></div>';
+  }
+  h+='<div style="margin-top:12px;display:flex;gap:6px"><button class="tb sm pri" onclick="saveNodeConfig(\''+nid+'\')">保存</button><button class="tb sm" onclick="removeNode(\''+nid+'\')">删除节点</button></div>';
+  $('wfPanelBody').innerHTML=h;
+  $('wfPanel').style.display='';
+}
+
+function saveNodeConfig(nid){
+  var updates={config:{}};
+  var title=document.getElementById('nc_title');
+  if(title)updates.config.title=title.value;
+  document.querySelectorAll('#wfPanelBody [id^="nc_"]').forEach(function(el){
+    var key=el.id.replace('nc_','');
+    var val=el.type==='number'?Number(el.value):el.value;
+    updates.config[key]=val;
+  });
+  // If custom_model is set, use it as the model
+  var cm=document.getElementById('nc_custom_model');
+  if(cm&&cm.value.trim()){updates.config.model=cm.value.trim()}
+  fetch(A+'/api/workflows/'+_curWf.id+'/nodes/'+nid,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(updates)})
+  .then(function(r){return r.json()}).then(function(d){
+    if(d.node){_nodes[nid]=d.node;renderWFCanvas();$('wfPanel').style.display='none'}
+  }).catch(function(){});
+}
+
+function removeNode(nid){
+  fetch(A+'/api/workflows/'+_curWf.id+'/nodes/'+nid,{method:'DELETE'}).then(function(){
+    delete _nodes[nid];_conns=_conns.filter(function(c){return c.source_node!==nid&&c.target_node!==nid});
+    renderWFCanvas();$('wfPanel').style.display='none';
+  }).catch(function(){});
+}
+
+function closeWFPanel(){$('wfPanel').style.display='none'}
+function rollbackWF(){
+  if(!_curWf)return;
+  // Load previous snapshot
+  fetch(A+'/api/workflows/'+_curWf.id).then(function(r){return r.json()}).then(function(d){
+    if(d.workflow){_nodes=d.workflow.nodes||{};_conns=d.workflow.connections||[];renderWFCanvas();aSys('已回退到上次保存','system')}
+  }).catch(function(e){aSys('回退失败: '+e,'error')});
+}
+
+function onWfModelChange(sel){
+  // When a preset model is selected, clear the custom model field
+  var cm=document.getElementById('nc_custom_model');
+  if(cm)cm.value='';
+}
+
+function executeWF(){
+  if(!_curWf)return;
+  $('wfOutput').style.display='';$('wfOutputBody').textContent='执行中...\n';
+  Object.keys(_nodes).forEach(function(k){_nodes[k]._status='pending'});
+  renderWFCanvas();
+  if(_wfSSE)_wfSSE.close();
+  _wfSSE=new EventSource(A+'/api/workflow/'+_curWf.id+'/execute');
+  _wfSSE.onmessage=function(e){
+    try{
+      var ev=JSON.parse(e.data);
+      if(ev.type==='node_start'){
+        if(_nodes[ev.node_id]){_nodes[ev.node_id]._status='running';renderWFCanvas()}
+        $('wfOutputBody').textContent+='▶ '+ev.node_type+' ('+ev.node_id.slice(0,6)+')...\n';
+      }else if(ev.type==='node_done'){
+        if(_nodes[ev.node_id]){_nodes[ev.node_id]._status='done';renderWFCanvas()}
+        $('wfOutputBody').textContent+='✓ '+ev.node_id.slice(0,6)+'\n';
+      }else if(ev.type==='node_error'){
+        if(_nodes[ev.node_id]){_nodes[ev.node_id]._status='error';renderWFCanvas()}
+        $('wfOutputBody').textContent+='✗ '+ev.error+'\n';
+      }else if(ev.type==='workflow_done'){
+        $('wfOutputBody').textContent+='━━━ 工作流执行完成 ━━━\n';
+        _wfSSE.close();
+      }else if(ev.type==='error'){
+        $('wfOutputBody').textContent+='错误: '+ev.message+'\n';
+      }
+      var ob=$('wfOutputBody');ob.scrollTop=ob.scrollHeight;
+    }catch(x){console.error(x)}
+  };
+  _wfSSE.onerror=function(){_wfSSE.close();$('wfOutputBody').textContent+='连接中断\n'};
+}
+
+function stopWF(){
+  fetch(A+'/api/workflow/'+_curWf.id+'/stop',{method:'POST'}).catch(function(){});
+  if(_wfSSE)_wfSSE.close();
+  Object.keys(_nodes).forEach(function(k){if(_nodes[k]._status==='running')_nodes[k]._status='pending'});
+  renderWFCanvas();
+}
+
+function uploadFileWF(){
+  var input=document.createElement('input');input.type='file';input.multiple=true;
+  input.accept='*/*';
+  input.onchange=function(){
+    var fd=new FormData();
+    Array.from(input.files).forEach(function(f){fd.append('files',f)});
+    fetch(A+'/api/files/upload',{method:'POST',body:fd})
+    .then(function(r){return r.json()}).then(function(d){
+      if(d.files&&d.files.length){
+        var names=d.files.map(function(f){return f.name}).join(', ');
+        aSys('已上传: '+names,'success');
+      }
+    }).catch(function(){aSys('上传失败','error')});
+  };
+  input.click();
+}
+</script>
+</body>
+</html>

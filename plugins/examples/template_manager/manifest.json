@@ -1,0 +1,38 @@
+{
+  "name": "template_manager",
+  "version": "1.0.0",
+  "display_name": "模板管理器",
+  "description": "管理代码模板，支持从预设模板快速初始化项目结构和代码骨架",
+  "author": "cx2118",
+  "plugin_type": "hook",
+  "entry_point": "main.py",
+  "hook_points": [
+    "before_director_plan",
+    "before_coding"
+  ],
+  "hook_priority": 40,
+  "dependencies": [],
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "auto_inject_templates": {
+        "type": "boolean",
+        "default": false,
+        "title": "自动注入模板",
+        "description": "是否在编码前自动注入匹配的模板"
+      },
+      "template_dir": {
+        "type": "string",
+        "default": "templates",
+        "title": "模板目录"
+      }
+    }
+  },
+  "default_config": {
+    "auto_inject_templates": false,
+    "template_dir": "templates"
+  },
+  "permissions": ["code_read", "code_modify"],
+  "tags": ["template", "scaffolding", "productivity"],
+  "icon": "📝"
+}

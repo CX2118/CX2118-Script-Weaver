@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+.storage/
+storage/
+.breakpoints/
+.workspace_backups/
+.sandbox/
+dist/
+_build/
+*.db
+*.db-shm
+*.db-wal
+.env
+*.log

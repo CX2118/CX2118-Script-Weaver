@@ -1,0 +1,31 @@
+{
+  "name": "data_exporter",
+  "version": "1.0.0",
+  "display_name": "数据导出器",
+  "description": "将 Pipeline 产物（需求文档、代码、审查报告）导出为 JSON/Markdown 格式",
+  "author": "cx2118",
+  "plugin_type": "exporter",
+  "entry_point": "main.py",
+  "hook_points": ["after_human_review", "on_shutdown"],
+  "hook_priority": 80,
+  "dependencies": [],
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "export_format": {"type": "string", "default": "json", "title": "导出格式", "enum": ["json", "markdown"]},
+      "export_dir": {"type": "string", "default": "workspace/exports", "title": "导出目录"},
+      "auto_export_on_complete": {"type": "boolean", "default": true, "title": "完成时自动导出"},
+      "include_requirements": {"type": "boolean", "default": true, "title": "包含需求文档"},
+      "include_code": {"type": "boolean", "default": true, "title": "包含代码"},
+      "include_review": {"type": "boolean", "default": true, "title": "包含审查报告"}
+    }
+  },
+  "default_config": {
+    "export_format": "json", "export_dir": "workspace/exports",
+    "auto_export_on_complete": true, "include_requirements": true,
+    "include_code": true, "include_review": true
+  },
+  "permissions": ["file_read", "file_write"],
+  "tags": ["export", "data", "report"],
+  "icon": "📦"
+}

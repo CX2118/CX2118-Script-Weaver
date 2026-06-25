@@ -1,0 +1,48 @@
+{
+  "name": "webhook_relay",
+  "version": "1.0.0",
+  "display_name": "Webhook 中继",
+  "description": "在关键 pipeline 阶段完成后发送 Webhook 通知到外部服务（Slack、Discord、自定义 URL）",
+  "author": "cx2118",
+  "plugin_type": "notifier",
+  "entry_point": "main.py",
+  "hook_points": [
+    "after_pm_chat",
+    "after_requirements_save",
+    "after_director_plan",
+    "after_coding",
+    "after_ai_review"
+  ],
+  "hook_priority": 90,
+  "dependencies": [],
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "webhook_url": {
+        "type": "string",
+        "default": "",
+        "title": "Webhook URL",
+        "description": "目标 Webhook URL（Slack/Discord/通用）"
+      },
+      "enabled_events": {
+        "type": "array",
+        "items": {"type": "string"},
+        "default": ["after_coding"],
+        "title": "启用的事件"
+      },
+      "include_code_preview": {
+        "type": "boolean",
+        "default": false,
+        "title": "包含代码预览"
+      }
+    }
+  },
+  "default_config": {
+    "webhook_url": "",
+    "enabled_events": ["after_coding"],
+    "include_code_preview": false
+  },
+  "permissions": ["network"],
+  "tags": ["webhook", "notification", "integration"],
+  "icon": "🔗"
+}

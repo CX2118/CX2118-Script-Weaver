@@ -1,0 +1,54 @@
+{
+  "name": "security_auditor_agent",
+  "version": "1.0.0",
+  "display_name": "安全审计员 Agent",
+  "description": "插件式自定义 AI Agent — 专门负责安全审计和代码合规检查，可注入到 Pipeline 任意阶段",
+  "author": "cx2118",
+  "plugin_type": "agent",
+  "entry_point": "main.py",
+  "hook_points": [
+    "before_code_save",
+    "after_ai_review",
+    "before_human_review"
+  ],
+  "hook_priority": 25,
+  "dependencies": [],
+  "agent_config": {
+    "name": "安全审计员",
+    "role": "security_auditor",
+    "description": "安全合规审查 — OWASP Top 10 / 注入攻击 / 数据泄露检测",
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V4-Flash",
+    "token_limit": 4096,
+    "system_prompt": "你是安全审计专家。审查代码中的安全风险：\n1. SQL 注入 / XSS / CSRF\n2. 硬编码密钥/密码\n3. 不安全的反序列化\n4. 权限校验缺失\n5. 敏感数据泄露\n\n输出 JSON 格式的发现列表。"
+  },
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "check_owasp": {
+        "type": "boolean",
+        "default": true,
+        "title": "OWASP Top 10 检查"
+      },
+      "check_injection": {
+        "type": "boolean",
+        "default": true,
+        "title": "注入攻击检查"
+      },
+      "block_on_critical": {
+        "type": "boolean",
+        "default": false,
+        "title": "严重问题阻断",
+        "description": "发现严重安全问题时阻断流程"
+      }
+    }
+  },
+  "default_config": {
+    "check_owasp": true,
+    "check_injection": true,
+    "block_on_critical": false
+  },
+  "permissions": ["code_read", "llm_access"],
+  "tags": ["agent", "security", "audit", "owasp"],
+  "icon": "🛡️"
+}

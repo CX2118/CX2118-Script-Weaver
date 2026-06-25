@@ -1,0 +1,10 @@
+{
+  "name": "code_beautifier",
+  "version": "1.0.0",
+  "description": "代码美化器 — 自动格式化和规范化代码风格",
+  "plugin_type": "transformer",
+  "entry_point": "main.py",
+  "hook_points": ["after_coding"],
+  "author": "CX2118",
+  "enabled": true
+}

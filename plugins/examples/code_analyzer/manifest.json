@@ -1,0 +1,30 @@
+{
+  "name": "code_analyzer",
+  "version": "1.0.0",
+  "display_name": "代码深度分析器",
+  "description": "对代码进行深度静态分析：复杂度计算、安全漏洞扫描、Import 检查",
+  "author": "cx2118",
+  "plugin_type": "validator",
+  "entry_point": "main.py",
+  "hook_points": ["after_syntax_check", "before_code_save"],
+  "hook_priority": 40,
+  "dependencies": [],
+  "validator_targets": ["python", "html"],
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "check_complexity": {"type": "boolean", "default": true, "title": "检查代码复杂度"},
+      "complexity_threshold": {"type": "integer", "default": 10, "title": "复杂度阈值"},
+      "check_security": {"type": "boolean", "default": true, "title": "安全检查"},
+      "check_imports": {"type": "boolean", "default": true, "title": "Import 检查"},
+      "max_function_lines": {"type": "integer", "default": 50, "title": "函数最大行数"}
+    }
+  },
+  "default_config": {
+    "check_complexity": true, "complexity_threshold": 10,
+    "check_security": true, "check_imports": true, "max_function_lines": 50
+  },
+  "permissions": ["code_read"],
+  "tags": ["analyzer", "security", "complexity", "static-analysis"],
+  "icon": "🔬"
+}

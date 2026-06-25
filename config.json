@@ -1,0 +1,131 @@
+{
+  "port": 8880,
+  "workspace": "workspace",
+  "skills_dir": "workspace/skills",
+  "files": {
+    "requirements": "workspace/project.md",
+    "structure": "workspace/project_structure.json",
+    "python": "workspace/main.py",
+    "html": "workspace/index.html"
+  },
+  "max_review_retries": 3,
+  "budget_limit": 10000000,
+  "agents": {
+    "project_manager": {
+      "name": "项目经理",
+      "enabled": true,
+      "provider": "siliconflow",
+      "model": "deepseek-ai/DeepSeek-V4-Flash",
+      "token_limit": 131072,
+      "system_prompt": "你是项目经理，负责与用户沟通需求、讨论方案、确认细节。\n\n工作方式：\n1. 理解用户需求，必要时追问细节\n2. 确认需求后输出完整的需求文档（Markdown格式）\n3. 需求文档应包含：功能模块、技术要求、数据模型、交付标准\n\n规则：\n- 用中文沟通，简洁专业\n- 主动询问不明确的地方\n- 确认后直接输出需求文档，不要问用户\"是否确认\""
+    },
+    "project_director": {
+      "name": "项目负责人",
+      "enabled": true,
+      "provider": "siliconflow",
+      "model": "deepseek-ai/DeepSeek-V4-Flash",
+      "token_limit": 8000,
+      "system_prompt": "你是项目负责人。根据需求文档制定技术方案和项目结构。\n\n输出格式（严格JSON）：\n{\"project_name\":\"名称\",\"description\":\"简述\",\"needs_html\":true,\"needs_python\":true,\"files\":{\"main.py\":{\"description\":\"描述\",\"sections\":[\"模块列表\"]},\"index.html\":{\"description\":\"页面描述\",\"sections\":[\"组件列表\"]}},\"dependencies\":[],\"notes\":\"说明\"}\n\n规则：\n- 根据需求自动判断需要HTML还是Python，不要硬编码\n- 如果需求涉及界面/网页，needs_html=true\n- 如果需求涉及后端/脚本，needs_python=true\n- 支持多文件项目结构，files中列出所有需要创建的文件\n- 如有技能参考，充分利用\n- 可以指定 tools_needed 列表用于自动安装工具"
+    },
+    "python_coder": {
+      "name": "Python编程师",
+      "enabled": true,
+      "provider": "siliconflow",
+      "model": "deepseek-ai/DeepSeek-V4-Flash",
+      "token_limit": 32768,
+      "system_prompt": "你是Python编程师。通过行级编辑操作修改代码。\n\n输出格式：\n<<<REPLACE 行号-行号>>>\n新内容\n<<<END>>>\n\n<<<INSERT 行号>>>\n内容\n<<<END>>>\n\n<<<DELETE 行号-行号>>>\n<<<END>>>\n\n规则：\n- 行号基于左侧[数字]\n- 只输出编辑操作\n- 保持缩进一致\n- 改动超60%用<<<FULL_REWRITE>>>\n- 代码要求清晰有注释\n- 不要输出python文件标注结构（python'''）\n\n技能库：workspace/skills/ 目录有参考文档，遇到不确定的技术问题时参考。"
+    },
+    "html_coder": {
+      "name": "HTML编程师",
+      "enabled": true,
+      "provider": "siliconflow",
+      "model": "deepseek-ai/DeepSeek-V4-Flash",
+      "token_limit": 10000,
+      "system_prompt": "你是HTML编程师。通过行级编辑操作修改HTML/CSS/JS。\n\n输出格式同Python编程师。\n\n规则：\n- 输出完整HTML\n- 界面美观响应式\n- 不依赖外部CDN(除Google Fonts)\n- 长代码合理分段，CSS放<head>，JS放<body>底部\n- 组件化思维，可复用的样式用CSS变量\n-直接输出代码\n\n技能库：workspace/skills/ 目录有参考文档，遇到不确定的技术问题时参考。"
+    }
+  },
+  "llm_providers": {
+    "siliconflow": {
+      "name": "SiliconFlow",
+      "base_url": "https://api.siliconflow.cn/v1",
+      "api_key": "sk-nwvoseidytjatgyicchozayenskcmkavsmpkstaephpglzif",
+      "models": [
+        "deepseek-ai/DeepSeek-V2.5",
+        "deepseek-ai/DeepSeek-R1",
+        "Qwen/Qwen2.5-72B-Instruct",
+        "Qwen/Qwen2.5-7B-Instruct",
+        "meta-llama/Meta-Llama-3.1-8B-Instruct"
+      ],
+      "default_model": "deepseek-ai/DeepSeek-V4-Flash"
+    },
+    "openai": {
+      "name": "OpenAI",
+      "base_url": "https://api.openai.com/v1",
+      "api_key": "sk-your-openai-api-key",
+      "models": [
+        "gpt-4o",
+        "gpt-4o-mini"
+      ],
+      "default_model": "google/gemma-4-e4b"
+    },
+    "deepseek": {
+      "name": "DeepSeek",
+      "base_url": "https://api.deepseek.com",
+      "api_key": "sk-your-deepseek-api-key",
+      "models": [
+        "deepseek-chat",
+        "deepseek-reasoner"
+      ],
+      "default_model": "deepseek-v4-flash"
+    }
+  },
+  "plugins_dir": "plugins",
+  "plugins": {
+    "enabled": true,
+    "hot_reload": true,
+    "auto_load_on_startup": true,
+    "sandbox_mode": true,
+    "max_plugins": 50
+  },
+  "sandbox": {
+    "dir": ".sandbox",
+    "auto_install": true,
+    "timeout": 60,
+    "max_output": 65536,
+    "pip_index": "https://pypi.org/simple",
+    "keep_venv": true
+  },
+  "tools": {
+    "auto_install_on_plan": true,
+    "search_limit": 10
+  },
+  "breakpoint": {
+    "save_dir": ".breakpoints",
+    "auto_save_interval": 15,
+    "heartbeat_threshold": 30,
+    "max_snapshots": 20
+  },
+  "web_search": {
+    "enabled": false,
+    "provider": "bing",
+    "api_key": "",
+    "custom_endpoint": "",
+    "max_results": 10,
+    "timeout": 15.0
+  },
+  "pm_agent": {
+    "enabled": true,
+    "max_projects": 50,
+    "auto_save_interval": 10,
+    "max_tool_call_limit": 16,
+    "skills_pending_dir": "workspace/skills/pending"
+  },
+  "html_style": {
+    "skill_file": "html设计.md",
+    "custom_prompt": "参考技能文档 html设计.md 的风格规范进行编码"
+  },
+  "user_llm": {
+    "default_provider": "siliconflow",
+    "default_model": "deepseek-ai/DeepSeek-V4-Flash"
+  }
+}

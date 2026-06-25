@@ -1,0 +1,10 @@
+{
+  "name": "performance_profiler",
+  "version": "1.0.0",
+  "description": "性能分析器 — 追踪各阶段执行时间和资源消耗",
+  "plugin_type": "hook",
+  "entry_point": "main.py",
+  "hook_points": ["before_coding", "after_coding", "before_pm_chat", "after_pm_chat", "before_director_plan", "after_director_plan"],
+  "author": "CX2118",
+  "enabled": true
+}

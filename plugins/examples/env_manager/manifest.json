@@ -1,0 +1,10 @@
+{
+  "name": "env_manager",
+  "version": "1.0.0",
+  "description": "环境管理器 — 管理多个运行环境配置和切换",
+  "plugin_type": "hook",
+  "entry_point": "main.py",
+  "hook_points": ["before_coding"],
+  "author": "CX2118",
+  "enabled": true
+}
