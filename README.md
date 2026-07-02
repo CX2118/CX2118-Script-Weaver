@@ -178,11 +178,11 @@ python main.py
   docker-compose up -d
   ```
 
-- **云端一键部署**（GitHub Actions / Vercel / Railway）
+- **云端一键部署**（GitHub Actions / Vercel / Railway）（已取消）
   - Fork 仓库 → 配置 API Key → 自动部署
   - 无需本地环境，浏览器直接使用
 
-- **桌面应用打包**
+- **桌面应用打包（失败产品）**
   - PyInstaller 打包为独立可执行文件
   - 双击即用，不需要安装 Python
 
